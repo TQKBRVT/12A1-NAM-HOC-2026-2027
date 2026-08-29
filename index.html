@@ -1167,11 +1167,15 @@
   <script>
     const TOTAL_WEEKS = 40;
 // --- CẤU HÌNH ĐÁM MÂY ---
-    const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxmkQs5CxwTk4wEjrrgvbSp6kz2htaWbzuuM7d438MmeJSRyytywZQXgx5QfNL9NbJT/exec";
+    // ⚠️ DÁN URL Apps Script (.../exec) sau khi Deploy vào đây. Để trống nghĩa là chưa kết nối cloud.
+    const GOOGLE_SHEET_API_URL = "DÁN_URL_APPS_SCRIPT_VÀO_ĐÂY";
     // Lưu ý bảo mật: token này CHỈ mang tính giảm thiểu, không phải bảo mật tuyệt đối,
     // vì mã nguồn phía client luôn có thể bị xem được. Muốn an toàn thật sự, Apps Script
     // (doPost) phải tự kiểm tra token này trước khi cho phép ghi/đọc dữ liệu.
-    const SYNC_SECRET_TOKEN = "DOI_TOKEN_NAY_O_CA_2_BEN";
+    // Token này ĐÃ khớp sẵn với file GoogleAppsScript_Backend.gs mới - không cần đổi gì thêm.
+    const SYNC_SECRET_TOKEN = "C12A1-yhxeqy6UB6EO9H6hycY8";
+
+    const CLOUD_ENABLED = GOOGLE_SHEET_API_URL && !GOOGLE_SHEET_API_URL.startsWith("DÁN_URL");
 
     // Chống XSS: luôn escape dữ liệu do người dùng nhập trước khi chèn vào innerHTML
     function escapeHtml(str) {
@@ -2899,7 +2903,7 @@ function isAnyModalOpen() {
 
 // 1. HÀM GỬI: Tự động quét và đóng gói TẤT CẢ dữ liệu của lớp gửi lên Cloud
 async function syncToCloud() {
-  if (!GOOGLE_SHEET_API_URL) return false;
+  if (!CLOUD_ENABLED) { setSyncStatus('local'); return false; }
 
   setSyncStatus('syncing');
 
@@ -2946,7 +2950,7 @@ async function syncToCloud() {
 // 2. HÀM TẢI: Kéo dữ liệu từ Cloud về, CHỈ áp dụng nếu bản trên cloud mới hơn bản đang có
 //    force = true (bấm nút "Làm mới" thủ công) sẽ luôn tải và áp dụng, kể cả khi timestamp bằng nhau.
 async function loadDataFromCloud(force = false) {
-  if (!GOOGLE_SHEET_API_URL) return;
+  if (!CLOUD_ENABLED) { setSyncStatus('local'); return; }
   if (isSyncing) return; // tránh gọi chồng chéo nhiều lần cùng lúc
   if (!force && isAnyModalOpen()) return; // đừng ghi đè dữ liệu khi người dùng đang nhập liệu dở
 
