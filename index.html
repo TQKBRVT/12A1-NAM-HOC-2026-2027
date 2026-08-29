@@ -1469,6 +1469,7 @@
       if (!weeklyData[selectedWeek].groupScores) weeklyData[selectedWeek].groupScores = { t1: 100, t2: 100, t3: 100, t4: 100 };
       weeklyData[selectedWeek].groupScores[key] = score;
       localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderWeeklyView();
       closeSingleGroupModal();
     }
@@ -1508,6 +1509,7 @@
         }
       };
       localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderWeeklyView(); closeWeeklyModal();
     }
     function deleteWeeklyData() {
@@ -1519,6 +1521,7 @@
           groupScores: { t1: 100, t2: 100, t3: 100, t4: 100 }
         };
         localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderWeeklyView();
       }
     }
@@ -1880,6 +1883,7 @@
       };
 
       localStorage.setItem('class_grades_12a1', JSON.stringify(gradesData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderGradeTable();
       closeGradeModal();
     }
@@ -1890,6 +1894,7 @@
       if (confirm(`Thầy có chắc muốn xóa dữ liệu điểm môn ${subject} của học sinh này?`)) {
         delete gradesData[gradeKey];
         localStorage.setItem('class_grades_12a1', JSON.stringify(gradesData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderGradeTable();
       }
     }
@@ -1968,6 +1973,7 @@
       }
       tkbData = { note: document.getElementById('inputTkbNote').value.trim(), grid: newM, afternoonGrid: newA };
       localStorage.setItem('class_tkb_full_12a1', JSON.stringify(tkbData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderTkb(); closeTkbModal();
     }
 
@@ -2040,6 +2046,7 @@
         t7_m: document.getElementById('bb_t7_m').value.trim(), t7_a: document.getElementById('bb_t7_a').value.trim()
       };
       localStorage.setItem('class_baobai_full_12a1', JSON.stringify(baobaiData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderBaoBaiCards(); closeBaoBaiModal();
     }
     function deleteBaoBaiWeek() {
@@ -2048,6 +2055,7 @@
           t2_m: "", t2_a: "", t3_m: "", t3_a: "", t4_m: "", t4_a: "", t5_m: "", t5_a: "", t6_m: "", t6_a: "", t7_m: "", t7_a: ""
         };
         localStorage.setItem('class_baobai_full_12a1', JSON.stringify(baobaiData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderBaoBaiCards();
       }
     }
@@ -2185,6 +2193,7 @@
       };
 
       localStorage.setItem('class_duty_40w_12a1', JSON.stringify(duty40WeeksData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderDutyWeekDropdown();
       renderDutyView();
       closeDutyModal();
@@ -2207,6 +2216,7 @@
           }
         };
         localStorage.setItem('class_duty_40w_12a1', JSON.stringify(duty40WeeksData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderDutyWeekDropdown();
         renderDutyView();
       }
@@ -2399,6 +2409,7 @@
       }
 
       localStorage.setItem('class_attendance_40w_12a1', JSON.stringify(attendanceData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       currentAttendanceWeek = targetWeek;
       renderAttendanceWeekDropdown();
       renderAttendanceView();
@@ -2410,6 +2421,7 @@
       if (record && confirm(`Thầy có chắc muốn xóa bản ghi chuyên cần ngày ${record.date} của học sinh "${record.name}"?`)) {
         attendanceData = attendanceData.filter(r => r.id !== recordId);
         localStorage.setItem('class_attendance_40w_12a1', JSON.stringify(attendanceData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderAttendanceView();
       }
     }
@@ -2418,6 +2430,7 @@
       if (confirm(`Thầy có chắc chắn muốn xóa toàn bộ dữ liệu ghi nhận chuyên cần của Tuần ${currentAttendanceWeek}?`)) {
         attendanceData = attendanceData.filter(r => parseInt(r.week) !== currentAttendanceWeek);
         localStorage.setItem('class_attendance_40w_12a1', JSON.stringify(attendanceData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderAttendanceView();
       }
     }
@@ -2512,6 +2525,7 @@
 
       seatingData[rk][dIdx] = [s1, s2];
       localStorage.setItem('class_seating_6x4_12a1', JSON.stringify(seatingData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderSeatingGrid();
       closeEditSingleDeskModal();
     }
@@ -2521,6 +2535,7 @@
       const dIdx = parseInt(document.getElementById('deskIndex').value);
       seatingData[rk][dIdx] = ["Trống", "Trống"];
       localStorage.setItem('class_seating_6x4_12a1', JSON.stringify(seatingData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderSeatingGrid();
       closeEditSingleDeskModal();
     }
@@ -2529,6 +2544,7 @@
       if (confirm("Thầy có chắc chắn muốn đặt lại toàn bộ sơ đồ lớp học về trạng thái trống?")) {
         seatingData = initDefaultSeating();
         localStorage.setItem('class_seating_6x4_12a1', JSON.stringify(seatingData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderSeatingGrid();
       }
     }
@@ -2588,6 +2604,7 @@
         person: document.getElementById('fundPerson').value.trim() || "Thủ quỹ"
       });
       localStorage.setItem('class_fund_12a1', JSON.stringify(fundData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderFundModule();
       closeFundModal();
     }
@@ -2596,6 +2613,7 @@
       if (confirm("Thầy có chắc muốn xóa giao dịch quỹ này?")) {
         fundData.splice(index, 1);
         localStorage.setItem('class_fund_12a1', JSON.stringify(fundData));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderFundModule();
       }
     }
@@ -2640,6 +2658,7 @@
         code: generateParentCode(), score: 100, history: []
       });
       renderTable(); closeAddModal(); document.getElementById("studentForm").reset();
+      syncToCloud(); // FIX: trước đây thiếu dòng này nên thêm học sinh không lên cloud
     }
     function deleteStudent(id) {
       const std = students.find(s => s.id === id);
@@ -2647,11 +2666,13 @@
         students = students.filter(s => s.id !== id);
         if (currentStudentId === id && students.length > 0) currentStudentId = students[0].id;
         renderTable(); renderRenLuyenModule();
+        syncToCloud(); // FIX: trước đây thiếu dòng này nên xóa học sinh không lên cloud
       }
     }
     function clearAllStudents() {
       if (confirm("⚠️ CẢNH BÁO: Thầy có chắc chắn muốn xóa toàn bộ danh sách học sinh hiện tại?")) {
         students = []; currentStudentId = null; renderTable(); renderRenLuyenModule();
+        syncToCloud(); // FIX: trước đây thiếu dòng này
       }
     }
 
@@ -2685,6 +2706,7 @@
         renderTable(); 
         renderRenLuyenModule(); 
         closeEditStudentModal();
+        syncToCloud(); // FIX: trước đây thiếu dòng này nên sửa thông tin học sinh không lên cloud
       }
     }
 
@@ -2707,6 +2729,7 @@
         }
       });
       renderTable(); closeImportModal(); alert(`Đã thêm thành công ${count} học sinh!`);
+      syncToCloud(); // FIX: đây là nguyên nhân chính - nhập danh sách lớp trước đây không hề lên cloud
     }
 
     // RÈN LUYỆN CÁ NHÂN LOGIC
@@ -2828,6 +2851,7 @@
           reason: document.getElementById('editHistoryReason').value.trim()
         };
         localStorage.setItem('class_students_12a1', JSON.stringify(students));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderRenLuyenModule(); closeEditHistoryModal();
       }
     }
@@ -2836,6 +2860,7 @@
       if (std && std.history && confirm("Thầy có chắc chắn muốn xóa dòng đánh giá này?")) {
         std.history.splice(index, 1);
         localStorage.setItem('class_students_12a1', JSON.stringify(students));
+      syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderRenLuyenModule();
       }
     }
