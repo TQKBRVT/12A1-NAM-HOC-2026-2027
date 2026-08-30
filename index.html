@@ -693,10 +693,27 @@
       </div>
 
       <div class="bg-white rounded-2xl shadow-sm border p-6">
-        <div class="w-full bg-slate-200 text-slate-700 font-bold text-center py-2.5 rounded-xl mb-8 border border-slate-300 shadow-inner">
-          <i class="fa-solid fa-chalkboard mr-2"></i> BÀN GIÁO VIÊN & BẢNG TỪ PHÒNG HỌC
-        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="seatingGridContainer"></div>
+
+        <div class="relative flex items-center mt-8">
+          <div class="flex-1"></div>
+          <div class="flex-1 flex justify-center">
+            <div class="bg-slate-200 text-slate-700 font-bold text-center py-2.5 px-6 rounded-xl border border-slate-300 shadow-inner">
+              <i class="fa-solid fa-chalkboard mr-2"></i> BẢNG TỪ
+            </div>
+          </div>
+          <div class="flex-1 flex justify-end">
+            <div class="bg-emerald-100 text-emerald-800 font-bold text-center py-2.5 px-6 rounded-xl border border-emerald-300 shadow-inner">
+              <i class="fa-solid fa-user-tie mr-2"></i> BÀN GIÁO VIÊN
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-start mt-3">
+          <div class="inline-flex items-center gap-2 bg-amber-50 text-amber-800 border border-amber-300 rounded-xl px-4 py-2 font-bold text-sm">
+            <i class="fa-solid fa-door-open"></i> Cửa ra vào
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1171,7 +1188,7 @@
     const TOTAL_WEEKS = 40;
 // --- CẤU HÌNH ĐÁM MÂY ---
     // ⚠️ DÁN URL Apps Script (.../exec) sau khi Deploy vào đây. Để trống nghĩa là chưa kết nối cloud.
-    const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzuEdo9xezE2pMU0vdsYcn6snWZJx_WJMEjKg1eUC2OU6ZNXgLhBJN6tJzSFDjRi4JZAw/exec";
+    const GOOGLE_SHEET_API_URL = "DÁN_URL_APPS_SCRIPT_VÀO_ĐÂY";
     // Lưu ý bảo mật: token này CHỈ mang tính giảm thiểu, không phải bảo mật tuyệt đối,
     // vì mã nguồn phía client luôn có thể bị xem được. Muốn an toàn thật sự, Apps Script
     // (doPost) phải tự kiểm tra token này trước khi cho phép ghi/đọc dữ liệu.
@@ -2468,7 +2485,7 @@
           desksHtml += `
             <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-2 hover:border-slate-400 transition">
               <div class="flex justify-between items-center border-b border-slate-100 pb-1">
-                <span class="font-bold text-slate-700 text-xs">Bàn ${dIdx + 1}</span>
+                <span class="font-bold text-slate-700 text-xs">Bàn ${6 - dIdx}</span>
                 <button onclick="openEditSingleDeskModal('${r.key}', ${dIdx})" class="text-xs text-emerald-700 hover:text-emerald-900 font-semibold flex items-center gap-1">
                   <i class="fa-solid fa-pen text-[10px]"></i> Đổi
                 </button>
@@ -2501,7 +2518,7 @@
       const rowNames = { row1: "Dãy 1", row2: "Dãy 2", row3: "Dãy 3", row4: "Dãy 4" };
       document.getElementById('deskRowKey').value = rowKey;
       document.getElementById('deskIndex').value = deskIndex;
-      document.getElementById('deskModalTitle').innerText = `Xếp Chỗ: ${rowNames[rowKey]} - Bàn ${deskIndex + 1}`;
+      document.getElementById('deskModalTitle').innerText = `Xếp Chỗ: ${rowNames[rowKey]} - Bàn ${6 - deskIndex}`;
 
       const desk = seatingData[rowKey][deskIndex] || ["Trống", "Trống"];
       const s1 = desk[0] || "Trống";
@@ -3120,23 +3137,34 @@ setInterval(() => loadDataFromCloud(false), 15000);
         <body>
           <h2 style="text-align:center;">SƠ ĐỒ VỊ TRÍ CHỖ NGỒI LỚP 12A1</h2>
           <table>
-            <tr><td class="board" colspan="${rowsConfig.length}">BÀN GIÁO VIÊN &amp; BẢNG TỪ PHÒNG HỌC</td></tr>
             <tr>
       `;
-      rowsConfig.forEach(r => { htmlContent += `<th>${r.label}</th>`; });
+      rowsConfig.forEach(r => { htmlContent += `<th colspan="2">${r.label}</th>`; });
       htmlContent += `</tr>`;
 
       for (let deskIdx = 0; deskIdx < 6; deskIdx++) {
+        // Dòng 1: tên 2 học sinh nằm cạnh nhau, mỗi người 1 cột riêng
         htmlContent += `<tr>`;
         rowsConfig.forEach(r => {
           const desks = seatingData[r.key] || [];
           const desk = desks[deskIdx] || ["Trống", "Trống"];
           const s1 = escapeHtml(desk[0] || "Trống");
           const s2 = escapeHtml(desk[1] || "Trống");
-          htmlContent += `<td><span class="desk-label">Bàn ${deskIdx + 1}</span><br>${s1}<br>${s2}</td>`;
+          htmlContent += `<td>${s1}</td><td>${s2}</td>`;
+        });
+        htmlContent += `</tr>`;
+
+        // Dòng 2: nhãn "Bàn X" gộp ngang 2 cột, nằm SAU dữ liệu học sinh (áp dụng đồng nhất cho mọi bàn)
+        htmlContent += `<tr>`;
+        rowsConfig.forEach(() => {
+          htmlContent += `<td class="desk-label" colspan="2">Bàn ${6 - deskIdx}</td>`;
         });
         htmlContent += `</tr>`;
       }
+
+      const totalCols = rowsConfig.length * 2; // 8 cột (4 dãy x 2 chỗ)
+      htmlContent += `<tr><td style="border:none;" colspan="2"></td><td class="board" colspan="4">BẢNG TỪ</td><td class="board" style="background-color:#d1fae5;" colspan="2">BÀN GIÁO VIÊN</td></tr>`;
+      htmlContent += `<tr><td colspan="${totalCols}" style="text-align:left; border:none; font-weight:bold; padding-top:10px;">🚪 Cửa ra vào</td></tr>`;
 
       htmlContent += `</table></body></html>`;
 
