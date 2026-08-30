@@ -251,7 +251,61 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6" id="semesterWeeklyTablesContainer"></div>
       </div>
+
+      <!-- Tiêu Chuẩn Thi Đua Học Sinh & Đoàn Trường (GVCN nhập tay) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+          <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <i class="fa-solid fa-user-graduate text-custom-yellow"></i> Tiêu Chuẩn Thi Đua Của Học Sinh
+            </h2>
+            <button onclick="openCriteriaModal('student')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-pen-to-square"></i> Sửa
+            </button>
+          </div>
+          <div id="criteriaStudentContainer" class="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap flex-1"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+          <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <i class="fa-solid fa-school-flag text-custom-yellow"></i> Tiêu Chuẩn Thi Đua Của Đoàn Trường
+            </h2>
+            <button onclick="openCriteriaModal('school')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-pen-to-square"></i> Sửa
+            </button>
+          </div>
+          <div id="criteriaSchoolContainer" class="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap flex-1"></div>
+        </div>
+      </div>
     </section>
+
+    <!-- MODAL: Tiêu Chuẩn Thi Đua (Học Sinh / Đoàn Trường) -->
+    <div id="criteriaModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <h3 class="font-bold mb-1" id="criteriaModalTitle">Sửa Tiêu Chuẩn Thi Đua</h3>
+        <p class="text-xs text-slate-500 mb-4">Thầy gõ tay HOẶC tải lên 1 file PDF tiêu chuẩn thi đua (có thể dùng cả 2). Nội dung/PDF sẽ hiển thị trên trang.</p>
+        <form onsubmit="saveCriteria(event)" class="space-y-4 text-sm">
+          <input type="hidden" id="criteriaType" />
+
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <label class="block text-xs font-semibold text-slate-700">Tải lên file PDF (tối đa ~5MB)</label>
+            <input type="file" id="criteriaPdfInput" accept="application/pdf" onchange="handleCriteriaPdfSelect(event)" class="text-xs w-full" />
+            <div id="criteriaPdfCurrentInfo" class="text-xs text-slate-600"></div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Hoặc nhập nội dung dạng văn bản</label>
+            <textarea id="criteriaTextarea" rows="10" class="w-full px-3 py-2 border rounded-lg text-xs leading-relaxed" placeholder="Ví dụ:&#10;1. Đi học đúng giờ, nghỉ học phải có phép...&#10;2. Đồng phục đúng quy định...&#10;3. ..."></textarea>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t">
+            <button type="button" onclick="closeCriteriaModal()" class="px-4 py-2 bg-slate-100 text-xs rounded-lg">Hủy</button>
+            <button type="submit" class="px-4 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- TAB 2: VI PHẠM RÈN LUYỆN -->
     <section id="section-vipham" class="tab-content hidden flex-1 flex-col p-6 space-y-6">
@@ -1332,6 +1386,153 @@
     }
     let selectedWeek = 1;
 
+    // 4b. TIÊU CHUẨN THI ĐUA (GVCN nhập tay hoặc tải PDF - Học Sinh & Đoàn Trường)
+    const DEFAULT_CRITERIA_STUDENT = `1. Đi học đầy đủ, đúng giờ; nghỉ học phải có đơn xin phép.
+2. Trang phục đúng quy định của nhà trường.
+3. Nghiêm túc trong giờ học, không sử dụng điện thoại khi chưa được phép.
+4. Giữ gìn vệ sinh chung, bảo vệ cơ sở vật chất lớp học.
+5. Tích cực phát biểu xây dựng bài, hoàn thành đầy đủ bài tập được giao.
+6. Lễ phép, đoàn kết, giúp đỡ bạn bè trong học tập và rèn luyện.`;
+    const DEFAULT_CRITERIA_SCHOOL = `1. Thực hiện nghiêm túc nội quy, quy chế của Đoàn trường.
+2. Tham gia đầy đủ các phong trào, hoạt động do Đoàn trường tổ chức.
+3. Đảm bảo sĩ số, nề nếp truy bài đầu giờ.
+4. Không vi phạm quy định về an toàn giao thông, tệ nạn xã hội.
+5. Hoàn thành các khoản đóng góp, hồ sơ theo yêu cầu của Đoàn trường đúng thời hạn.`;
+    const CRITERIA_PDF_MAX_BYTES = 5 * 1024 * 1024; // ~5MB gốc file
+
+    let criteriaStudentText = localStorage.getItem('class_criteria_student_12a1') ?? DEFAULT_CRITERIA_STUDENT;
+    let criteriaSchoolText = localStorage.getItem('class_criteria_school_12a1') ?? DEFAULT_CRITERIA_SCHOOL;
+    function loadCriteriaPdf(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
+    }
+    let criteriaStudentPdf = loadCriteriaPdf('class_criteria_student_pdf_12a1'); // { name, dataUrl } | null
+    let criteriaSchoolPdf = loadCriteriaPdf('class_criteria_school_pdf_12a1');
+    let pendingCriteriaPdf = { student: undefined, school: undefined }; // undefined = không đổi, null = xóa, {name,dataUrl} = file mới chọn
+
+    function renderCriteria() {
+      function buildBlock(text, pdf, type) {
+        let html = '';
+        if (pdf && pdf.dataUrl) {
+          html += `
+            <div class="mb-3">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <a href="${pdf.dataUrl}" target="_blank" class="text-emerald-700 hover:text-emerald-900 underline text-xs font-semibold flex items-center gap-1.5 truncate">
+                  <i class="fa-solid fa-file-pdf text-rose-600"></i> ${pdf.name || 'Tiêu chuẩn thi đua.pdf'}
+                </a>
+                <button type="button" onclick="openCriteriaPdfFullscreen('${type}')" class="text-xs text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1 flex-shrink-0">
+                  <i class="fa-solid fa-expand text-[11px]"></i> Phóng to
+                </button>
+              </div>
+              <iframe id="criteriaPdfFrame_${type}" src="${pdf.dataUrl}" class="w-full h-[600px] rounded-lg border border-slate-200" title="Tiêu chuẩn thi đua PDF"></iframe>
+            </div>`;
+        }
+        if (text && text.trim()) {
+          html += `<div class="whitespace-pre-wrap">${text.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`;
+        }
+        if (!html) html = 'Chưa có nội dung, bấm "Sửa" để nhập hoặc tải PDF lên.';
+        return html;
+      }
+      const elStudent = document.getElementById('criteriaStudentContainer');
+      const elSchool = document.getElementById('criteriaSchoolContainer');
+      if (elStudent) elStudent.innerHTML = buildBlock(criteriaStudentText, criteriaStudentPdf, 'student');
+      if (elSchool) elSchool.innerHTML = buildBlock(criteriaSchoolText, criteriaSchoolPdf, 'school');
+    }
+
+    function openCriteriaPdfFullscreen(type) {
+      const frame = document.getElementById(`criteriaPdfFrame_${type}`);
+      if (!frame) return;
+      if (frame.requestFullscreen) frame.requestFullscreen();
+      else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+      else window.open(type === 'student' ? (criteriaStudentPdf && criteriaStudentPdf.dataUrl) : (criteriaSchoolPdf && criteriaSchoolPdf.dataUrl), '_blank');
+    }
+
+    function openCriteriaModal(type) {
+      document.getElementById('criteriaType').value = type;
+      document.getElementById('criteriaModalTitle').innerText =
+        type === 'student' ? 'Sửa Tiêu Chuẩn Thi Đua Của Học Sinh' : 'Sửa Tiêu Chuẩn Thi Đua Của Đoàn Trường';
+      document.getElementById('criteriaTextarea').value = type === 'student' ? criteriaStudentText : criteriaSchoolText;
+      document.getElementById('criteriaPdfInput').value = '';
+      pendingCriteriaPdf.student = undefined;
+      pendingCriteriaPdf.school = undefined;
+      renderCriteriaPdfInfo(type);
+      document.getElementById('criteriaModal').classList.remove('hidden');
+      document.getElementById('criteriaModal').classList.add('flex');
+    }
+    function closeCriteriaModal() { document.getElementById('criteriaModal').classList.add('hidden'); }
+
+    function renderCriteriaPdfInfo(type) {
+      const el = document.getElementById('criteriaPdfCurrentInfo');
+      if (!el) return;
+      const pending = pendingCriteriaPdf[type];
+      const existing = type === 'student' ? criteriaStudentPdf : criteriaSchoolPdf;
+      if (pending === null) {
+        el.innerHTML = `<span class="text-rose-600">Sẽ xóa PDF hiện tại khi bấm Lưu.</span>`;
+      } else if (pending) {
+        el.innerHTML = `<span class="text-emerald-700 font-semibold">Đã chọn: ${pending.name} (sẽ lưu khi bấm Lưu)</span>`;
+      } else if (existing && existing.name) {
+        el.innerHTML = `Hiện có: <strong>${existing.name}</strong>
+          <button type="button" onclick="removeCriteriaPdf('${type}')" class="ml-2 text-rose-600 hover:text-rose-800 underline">Xóa PDF này</button>`;
+      } else {
+        el.innerHTML = `<span class="text-slate-400">Chưa có file PDF nào.</span>`;
+      }
+    }
+    function removeCriteriaPdf(type) {
+      pendingCriteriaPdf[type] = null;
+      document.getElementById('criteriaPdfInput').value = '';
+      renderCriteriaPdfInfo(type);
+    }
+
+    function handleCriteriaPdfSelect(event) {
+      const type = document.getElementById('criteriaType').value;
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (file.type !== 'application/pdf') {
+        alert('Chỉ chấp nhận file PDF.');
+        event.target.value = '';
+        return;
+      }
+      if (file.size > CRITERIA_PDF_MAX_BYTES) {
+        alert('File PDF quá lớn (tối đa khoảng 5MB). Thầy hãy nén hoặc rút gọn file trước khi tải lên.');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingCriteriaPdf[type] = { name: file.name, dataUrl: reader.result };
+        renderCriteriaPdfInfo(type);
+      };
+      reader.onerror = () => alert('Không đọc được file PDF, thầy thử lại nhé.');
+      reader.readAsDataURL(file);
+    }
+
+    function saveCriteria(e) {
+      e.preventDefault();
+      const type = document.getElementById('criteriaType').value;
+      const text = document.getElementById('criteriaTextarea').value;
+      const pdfKey = type === 'student' ? 'class_criteria_student_pdf_12a1' : 'class_criteria_school_pdf_12a1';
+      const textKey = type === 'student' ? 'class_criteria_student_12a1' : 'class_criteria_school_12a1';
+
+      if (type === 'student') criteriaStudentText = text; else criteriaSchoolText = text;
+      localStorage.setItem(textKey, text);
+
+      const pending = pendingCriteriaPdf[type];
+      try {
+        if (pending === null) {
+          localStorage.removeItem(pdfKey);
+          if (type === 'student') criteriaStudentPdf = null; else criteriaSchoolPdf = null;
+        } else if (pending) {
+          localStorage.setItem(pdfKey, JSON.stringify(pending));
+          if (type === 'student') criteriaStudentPdf = pending; else criteriaSchoolPdf = pending;
+        }
+      } catch (err) {
+        alert('Không thể lưu file PDF (có thể do file quá lớn so với dung lượng lưu trữ của trình duyệt). Nội dung văn bản vẫn được lưu bình thường.');
+      }
+
+      if (typeof syncToCloud === 'function') syncToCloud();
+      renderCriteria();
+      closeCriteriaModal();
+    }
+
     // 5. DỮ LIỆU ĐIỂM SỐ HỌC TẬP
     let gradesData = JSON.parse(localStorage.getItem('class_grades_12a1')) || {};
 
@@ -1590,6 +1791,7 @@
       `;
       applyPermissions();
       renderSemesterSummary();
+      renderCriteria();
     }
 
     // Tổng kết riêng biệt cho Học Kỳ 1 (Tuần 1-20) và Học Kỳ 2 (Tuần 21-40):
@@ -3298,6 +3500,15 @@ async function loadDataFromCloud(force = false) {
       if (typeof fundData !== 'undefined' && localStorage.getItem('class_fund_12a1')) {
         fundData = JSON.parse(localStorage.getItem('class_fund_12a1'));
       }
+      if (localStorage.getItem('class_criteria_student_12a1') !== null) {
+        criteriaStudentText = localStorage.getItem('class_criteria_student_12a1');
+      }
+      if (localStorage.getItem('class_criteria_school_12a1') !== null) {
+        criteriaSchoolText = localStorage.getItem('class_criteria_school_12a1');
+      }
+      criteriaStudentPdf = loadCriteriaPdf('class_criteria_student_pdf_12a1');
+      criteriaSchoolPdf = loadCriteriaPdf('class_criteria_school_pdf_12a1');
+      if (typeof renderCriteria === 'function') renderCriteria();
 
       // Vẽ lại toàn bộ giao diện với dữ liệu mới
       if (typeof renderTable === 'function') renderTable();
