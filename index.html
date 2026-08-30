@@ -540,7 +540,12 @@
 
     <!-- TAB 6: RÈN LUYỆN CÁ NHÂN -->
     <section id="section-renluyen" class="tab-content hidden flex-1 flex-col p-6 space-y-6">
-      <div class="bg-custom-header rounded-2xl p-6 text-white shadow-md"><h1 class="text-2xl font-bold">Rèn Luyện & Theo Dõi Cá Nhân 12A1</h1></div>
+      <div class="bg-custom-header rounded-2xl p-6 text-white shadow-md flex flex-wrap justify-between items-center gap-4">
+        <h1 class="text-2xl font-bold">Rèn Luyện & Theo Dõi Cá Nhân 12A1</h1>
+        <button onclick="exportConductReportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+          <i class="fa-solid fa-file-excel"></i> Xuất Bảng Điểm Hạnh Kiểm Cả Lớp
+        </button>
+      </div>
       
       <div class="bg-white rounded-2xl p-5 shadow-sm border flex flex-wrap items-center justify-between gap-4">
         <div class="flex gap-2 flex-1 max-w-md">
@@ -1133,7 +1138,7 @@
   </div>
 
   <!-- MODAL SỬA ĐÁNH GIÁ CÁ NHÂN -->
-  <div id="editHistoryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"><h3 class="text-lg font-bold mb-4">Sửa Đánh Giá</h3><form onsubmit="saveEditHistoryRecord(event)" class="space-y-4 text-sm"><input type="hidden" id="editHistoryIndex" /><div><label class="block text-xs font-semibold mb-1">Ngày</label><input type="text" id="editHistoryDate" required class="w-full px-3 py-2 border rounded-lg" /></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold mb-1">Phân loại</label><select id="editHistoryType" class="w-full px-3 py-2 border rounded-lg"><option value="plus">Khen thưởng (+)</option><option value="minus">Vi phạm (-)</option></select></div><div><label class="block text-xs font-semibold mb-1">Điểm</label><input type="number" id="editHistoryPoints" min="1" max="50" required class="w-full px-3 py-2 border rounded-lg font-bold" /></div></div><div><label class="block text-xs font-semibold mb-1">Lý do</label><textarea id="editHistoryReason" rows="3" required class="w-full px-3 py-2 border rounded-lg"></textarea></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="button" onclick="closeEditHistoryModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="submit" class="px-5 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button></div></form></div></div>
+  <div id="editHistoryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"><h3 class="text-lg font-bold mb-4">Sửa Đánh Giá</h3><form onsubmit="saveEditHistoryRecord(event)" class="space-y-4 text-sm"><input type="hidden" id="editHistoryIndex" /><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold mb-1">Ngày</label><input type="text" id="editHistoryDate" required class="w-full px-3 py-2 border rounded-lg" /></div><div><label class="block text-xs font-semibold mb-1">Tuần học</label><select id="editHistoryWeek" required class="w-full px-3 py-2 border rounded-lg bg-slate-50"></select></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold mb-1">Phân loại</label><select id="editHistoryType" class="w-full px-3 py-2 border rounded-lg"><option value="plus">Khen thưởng (+)</option><option value="minus">Vi phạm (-)</option></select></div><div><label class="block text-xs font-semibold mb-1">Điểm</label><input type="number" id="editHistoryPoints" min="1" max="50" required class="w-full px-3 py-2 border rounded-lg font-bold" /></div></div><div><label class="block text-xs font-semibold mb-1">Lý do</label><textarea id="editHistoryReason" rows="3" required class="w-full px-3 py-2 border rounded-lg"></textarea></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="button" onclick="closeEditHistoryModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="submit" class="px-5 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button></div></form></div></div>
   
   <!-- MODAL CHỈNH SỬA HỌC SINH -->
   <div id="editStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
@@ -1181,7 +1186,7 @@
 
   <div id="importModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl"><h3 class="text-lg font-bold mb-2">Dán Danh Sách Lớp (Từ Excel)</h3><textarea id="bulkNamesInput" rows="8" class="w-full p-3 border rounded-xl text-xs font-mono"></textarea><div class="flex justify-end gap-2 pt-3 border-t mt-3"><button type="button" onclick="closeImportModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="button" onclick="processBulkImport()" class="px-5 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Tạo Nhanh</button></div></div></div>
   <div id="addModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"><h3 class="font-bold mb-4">Thêm Học Sinh Mới</h3><form id="studentForm" onsubmit="saveStudent(event)" class="space-y-4 text-sm"><div><label class="block text-xs font-semibold mb-1">Họ và Tên</label><input type="text" id="name" required class="w-full px-3 py-2 border rounded-lg" /></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold mb-1">Giới Tính</label><select id="gender" class="w-full px-3 py-2 border rounded-lg"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div><div><label class="block text-xs font-semibold mb-1">Tổ</label><select id="group" class="w-full px-3 py-2 border rounded-lg"><option value="Tổ 1">Tổ 1</option><option value="Tổ 2">Tổ 2</option><option value="Tổ 3">Tổ 3</option><option value="Tổ 4">Tổ 4</option></select></div></div><div><label class="block text-xs font-semibold mb-1">Chức Vụ</label><input type="text" id="role" value="Thành viên" class="w-full px-3 py-2 border rounded-lg" /></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="submit" class="px-4 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button></div></form></div></div>
-  <div id="scoreModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"><h3 id="modalScoreTitle" class="text-lg font-bold mb-4">Điểm</h3><form onsubmit="saveScoreAction(event)" class="space-y-4 text-sm"><input type="hidden" id="actionType" value="plus" /><div><label class="block text-xs font-semibold mb-1">Số Điểm</label><input type="number" id="actionPoints" required min="1" max="50" value="5" class="w-full px-3 py-2 border rounded-lg font-bold text-emerald-700" /></div><div><label class="block text-xs font-semibold mb-1">Lý Do</label><textarea id="actionReason" required rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="button" onclick="closeScoreModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="submit" id="btnScoreSubmit" class="px-4 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button></div></form></div></div>
+  <div id="scoreModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"><h3 id="modalScoreTitle" class="text-lg font-bold mb-4">Điểm</h3><form onsubmit="saveScoreAction(event)" class="space-y-4 text-sm"><input type="hidden" id="actionType" value="plus" /><div><label class="block text-xs font-semibold mb-1">Áp dụng cho tuần học</label><select id="actionWeek" required class="w-full px-3 py-2 border rounded-lg font-semibold bg-slate-50"></select></div><div><label class="block text-xs font-semibold mb-1">Số Điểm</label><input type="number" id="actionPoints" required min="1" max="50" value="5" class="w-full px-3 py-2 border rounded-lg font-bold text-emerald-700" /></div><div><label class="block text-xs font-semibold mb-1">Lý Do</label><textarea id="actionReason" required rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="button" onclick="closeScoreModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="submit" id="btnScoreSubmit" class="px-4 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button></div></form></div></div>
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
@@ -2788,7 +2793,7 @@
         document.getElementById('infoName').innerText = "--";
         document.getElementById('infoGroup').innerText = "--";
         document.getElementById('infoCode').innerText = "--";
-        document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-400">Chưa có học sinh</td></tr>';
+        document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Chưa có học sinh</td></tr>';
         applyPermissions();
         return;
       }
@@ -2806,7 +2811,7 @@
       document.getElementById('statPlusCount').innerText = totalPlus;
       document.getElementById('statMinusCount').innerText = totalMinus;
 
-      let rank = "Yếu (Chưa đạt)", rankColor = "text-rose-600";
+      let rank = "Chưa Đạt", rankColor = "text-rose-600";
       if (score >= 40) {
         rank = "Tốt";
         rankColor = "text-emerald-700";
@@ -2814,10 +2819,10 @@
         rank = "Khá";
         rankColor = "text-amber-600";
       } else if (score >= 10) {
-        rank = "Trung bình (Đạt)";
+        rank = "Đạt";
         rankColor = "text-blue-600";
       } else {
-        rank = "Yếu (Chưa đạt)";
+        rank = "Chưa Đạt";
         rankColor = "text-rose-600";
       }
       const rankEl = document.getElementById('statRank');
@@ -2826,15 +2831,17 @@
       const tbody = document.getElementById('historyTableBody');
       tbody.innerHTML = '';
       if (history.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-400">Chưa có dữ liệu đánh giá rèn luyện</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Chưa có dữ liệu đánh giá rèn luyện</td></tr>';
         applyPermissions();
         return;
       }
       history.forEach((h, index) => {
         const row = document.createElement('tr');
         row.className = "border-b hover:bg-slate-50 transition";
+        const wk = parseInt(h.week) || 1;
         row.innerHTML = `
           <td class="py-3 px-4 font-mono text-xs text-slate-500">${h.date}</td>
+          <td class="py-3 px-4 text-center text-xs font-semibold text-slate-600">Tuần ${wk}</td>
           <td class="py-3 px-4 font-medium text-slate-800">${h.reason}</td>
           <td class="py-3 px-4 text-center">${h.type === 'plus' ? '<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">Khen thưởng</span>' : '<span class="bg-rose-100 text-rose-800 text-xs px-2.5 py-0.5 rounded-full font-bold">Vi phạm</span>'}</td>
           <td class="py-3 px-4 text-center font-bold ${h.type === 'plus' ? 'text-emerald-600' : 'text-rose-600'}">${h.type === 'plus' ? '+' : '-'}${h.points}</td>
@@ -2856,6 +2863,16 @@
       const item = std.history[index];
       document.getElementById('editHistoryIndex').value = index;
       document.getElementById('editHistoryDate').value = item.date;
+      const weekSel = document.getElementById('editHistoryWeek');
+      weekSel.innerHTML = '';
+      for (let i = 1; i <= 40; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = `Tuần ${i} (${i <= 20 ? 'HK1' : 'HK2'})`;
+        weekSel.appendChild(opt);
+      }
+      // Bản ghi cũ trước khi có tính năng này có thể chưa có tuần -> mặc định Tuần 1
+      weekSel.value = parseInt(item.week) || 1;
       document.getElementById('editHistoryType').value = item.type;
       document.getElementById('editHistoryPoints').value = item.points;
       document.getElementById('editHistoryReason').value = item.reason;
@@ -2868,12 +2885,28 @@
       const std = students.find(s => s.id === currentStudentId);
       const index = parseInt(document.getElementById('editHistoryIndex').value);
       if (std && std.history && std.history[index]) {
+        const oldItem = std.history[index];
         std.history[index] = {
           date: document.getElementById('editHistoryDate').value.trim(),
           type: document.getElementById('editHistoryType').value,
           points: parseInt(document.getElementById('editHistoryPoints').value),
-          reason: document.getElementById('editHistoryReason').value.trim()
+          reason: document.getElementById('editHistoryReason').value.trim(),
+          week: parseInt(document.getElementById('editHistoryWeek').value) || 1,
+          vId: oldItem.vId // giữ liên kết với Sổ Tổng Hợp Vi Phạm (nếu có) để không bị trùng/lệch khi đồng bộ
         };
+        // Nếu bản ghi này gắn với 1 dòng trong Sổ Tổng Hợp Vi Phạm, cập nhật đồng bộ luôn dòng đó
+        if (oldItem.vId && typeof violations40wData !== 'undefined') {
+          const vIdx = violations40wData.findIndex(r => r.id === oldItem.vId);
+          if (vIdx !== -1) {
+            violations40wData[vIdx] = {
+              ...violations40wData[vIdx],
+              week: std.history[index].week,
+              date: std.history[index].date,
+              reason: std.history[index].reason,
+              points: std.history[index].points
+            };
+          }
+        }
         localStorage.setItem('class_students_12a1', JSON.stringify(students));
       syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderRenLuyenModule(); closeEditHistoryModal();
@@ -3048,7 +3081,21 @@ async function loadDataFromCloud(force = false) {
 // Tự động làm mới định kỳ (mỗi 15 giây) để các thiết bị khác thấy dữ liệu mới mà không cần F5.
 // Sẽ tự bỏ qua nếu người dùng đang mở form nhập liệu, tránh mất dữ liệu đang gõ dở.
 setInterval(() => loadDataFromCloud(false), 15000);
-    function openScoreModal(type) { document.getElementById('actionType').value = type; document.getElementById('scoreModal').classList.remove('hidden'); document.getElementById('scoreModal').classList.add('flex'); }
+    function openScoreModal(type) {
+      document.getElementById('actionType').value = type;
+      document.getElementById('modalScoreTitle').innerText = type === 'plus' ? 'Cộng Điểm Rèn Luyện' : 'Trừ Điểm Rèn Luyện';
+      const weekSel = document.getElementById('actionWeek');
+      weekSel.innerHTML = '';
+      for (let i = 1; i <= 40; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = `Tuần ${i} (${i <= 20 ? 'HK1' : 'HK2'})`;
+        weekSel.appendChild(opt);
+      }
+      // Mặc định chọn tuần đang theo dõi chung của lớp (đồng bộ với tuần vi phạm hiện tại)
+      weekSel.value = (typeof currentViolationWeek !== 'undefined' && currentViolationWeek) ? currentViolationWeek : 1;
+      document.getElementById('scoreModal').classList.remove('hidden'); document.getElementById('scoreModal').classList.add('flex');
+    }
     function closeScoreModal() { document.getElementById('scoreModal').classList.add('hidden'); }
     async function saveScoreAction(e) {
       e.preventDefault();
@@ -3059,7 +3106,8 @@ setInterval(() => loadDataFromCloud(false), 15000);
         date: new Date().toLocaleDateString('vi-VN'),
         reason: document.getElementById('actionReason').value,
         type: document.getElementById('actionType').value,
-        points: parseInt(document.getElementById('actionPoints').value)
+        points: parseInt(document.getElementById('actionPoints').value),
+        week: parseInt(document.getElementById('actionWeek').value) || 1
       });
       localStorage.setItem('class_students_12a1', JSON.stringify(students));
       renderRenLuyenModule(); closeScoreModal();
@@ -3114,6 +3162,92 @@ setInterval(() => loadDataFromCloud(false), 15000);
 
     // XUẤT EXCEL
     // Xuất sơ đồ chỗ ngồi ra file Excel (.xls) để in, giữ đúng bố cục 4 dãy x 6 bàn
+    // Xuất bảng điểm hạnh kiểm toàn lớp theo tuần: mỗi học kỳ bắt đầu từ 50 điểm,
+    // trừ theo từng lần vi phạm (hoặc cộng theo khen thưởng), sang học kỳ 2 tính lại từ đầu.
+    function getConductRank_(score) {
+      if (score >= 40) return "Tốt";
+      if (score >= 25) return "Khá";
+      if (score >= 10) return "Đạt";
+      return "Chưa Đạt";
+    }
+
+    function exportConductReportToExcel() {
+      if (!students || students.length === 0) {
+        alert("Chưa có học sinh nào trong danh sách lớp để xuất báo cáo!");
+        return;
+      }
+
+      const semesters = [
+        { label: "HỌC KỲ 1 (Tuần 1 - 20)", weekStart: 1, weekEnd: 20 },
+        { label: "HỌC KỲ 2 (Tuần 21 - 40)", weekStart: 21, weekEnd: 40 }
+      ];
+
+      let htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            table { border-collapse: collapse; width: 100%; font-family: 'Times New Roman', Times, serif; margin-bottom: 24px; }
+            th { background-color: #0b3d2c; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 6px; text-align: center; font-size: 12px; }
+            td { border: 1px solid #000000; padding: 6px; text-align: center; vertical-align: middle; font-size: 12px; }
+            .name-col { text-align: left; font-weight: bold; }
+            .plus { color: #059669; font-weight: bold; }
+            .minus { color: #dc2626; font-weight: bold; }
+            h2 { text-align: center; }
+            h3 { margin-top: 20px; background-color: #f1f5f9; padding: 6px; }
+          </style>
+        </head>
+        <body>
+          <h2>BẢNG TỔNG HỢP ĐIỂM HẠNH KIỂM LỚP 12A1 (THEO TUẦN)</h2>
+      `;
+
+      semesters.forEach(sem => {
+        htmlContent += `<h3>${sem.label} - Mỗi học sinh bắt đầu từ 50 điểm, tính lại từ đầu khi sang học kỳ mới</h3>`;
+        htmlContent += `<table><tr><th>STT</th><th>Họ và Tên</th><th>Tổ</th>`;
+        for (let w = sem.weekStart; w <= sem.weekEnd; w++) {
+          htmlContent += `<th>Tuần ${w}</th>`;
+        }
+        htmlContent += `<th>Tổng Cộng/Trừ</th><th>Điểm Hạnh Kiểm</th><th>Xếp Loại</th></tr>`;
+
+        students.forEach((std, idx) => {
+          let score = 50;
+          const weekCells = [];
+          for (let w = sem.weekStart; w <= sem.weekEnd; w++) {
+            // Bản ghi cũ (tạo trước khi có cột "Tuần") không có h.week -> quy ước tính vào Tuần 1 để không bị mất dữ liệu
+            const weekItems = (std.history || []).filter(h => (parseInt(h.week) || 1) === w);
+            let weekNet = 0;
+            weekItems.forEach(h => {
+              weekNet += (h.type === 'plus' ? (h.points || 0) : -(h.points || 0));
+            });
+            score += weekNet;
+            weekCells.push(weekNet);
+          }
+
+          const totalChange = score - 50;
+          htmlContent += `<tr><td>${idx + 1}</td><td class="name-col">${escapeHtml(std.name)}</td><td>${escapeHtml(std.group)}</td>`;
+          weekCells.forEach(v => {
+            if (v > 0) htmlContent += `<td class="plus">+${v}</td>`;
+            else if (v < 0) htmlContent += `<td class="minus">${v}</td>`;
+            else htmlContent += `<td></td>`;
+          });
+          htmlContent += `<td class="${totalChange > 0 ? 'plus' : (totalChange < 0 ? 'minus' : '')}">${totalChange > 0 ? '+' + totalChange : totalChange}</td>`;
+          htmlContent += `<td><b>${score}</b></td><td>${getConductRank_(score)}</td></tr>`;
+        });
+
+        htmlContent += `</table>`;
+      });
+
+      htmlContent += `</body></html>`;
+
+      const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `BangDiemHanhKiem_CaLop_12A1.xls`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     function exportSeatingToExcel() {
       const rowsConfig = [
         { label: "DÃY 1 (Cửa sổ)", key: "row1" },
