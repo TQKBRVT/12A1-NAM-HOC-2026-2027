@@ -152,8 +152,8 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs text-slate-500 font-medium">Hạng Trong Khối 12</p>
-            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankBlock">Hạng: 1</h3>
-            <p class="text-[11px] text-emerald-600 font-medium mt-1" id="kpiRankBlockDesc">▲ Dẫn đầu khối 12</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankBlock">Chưa cập nhật</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-1" id="kpiRankBlockDesc">Thầy sẽ cập nhật hàng tuần</p>
           </div>
           <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold">
             <i class="fa-solid fa-crown"></i>
@@ -163,7 +163,7 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs text-slate-500 font-medium">Hạng Toàn Trường THPT</p>
-            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankSchool">Hạng: 1</h3>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankSchool">Chưa cập nhật</h3>
             <p class="text-[11px] text-slate-400 mt-1">Toàn trường</p>
           </div>
           <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
@@ -1228,7 +1228,7 @@
     const TOTAL_WEEKS = 40;
 // --- CẤU HÌNH ĐÁM MÂY ---
     // ⚠️ DÁN URL Apps Script (.../exec) sau khi Deploy vào đây. Để trống nghĩa là chưa kết nối cloud.
-    const GOOGLE_SHEET_API_URL = "DÁN_URL_APPS_SCRIPT_VÀO_ĐÂY";
+    const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzuEdo9xezE2pMU0vdsYcn6snWZJx_WJMEjKg1eUC2OU6ZNXgLhBJN6tJzSFDjRi4JZAw/exec";
     // Lưu ý bảo mật: token này CHỈ mang tính giảm thiểu, không phải bảo mật tuyệt đối,
     // vì mã nguồn phía client luôn có thể bị xem được. Muốn an toàn thật sự, Apps Script
     // (doPost) phải tự kiểm tra token này trước khi cho phép ghi/đọc dữ liệu.
@@ -1311,6 +1311,21 @@
       return data;
     }
     let weeklyData = JSON.parse(localStorage.getItem('class_weekly_40w_full_12a1')) || init40WeeksWeeklyData();
+    // Di chuyển dữ liệu cũ: các tuần chưa từng được GVCN cập nhật (vẫn còn Hạng #1 mặc định)
+    // sẽ được đưa về trạng thái "để trống - chưa cập nhật" đúng như mong muốn ban đầu.
+    // Chỉ chạy 1 lần duy nhất để không xóa mất số liệu thật mà GVCN đã nhập là hạng #1.
+    if (!localStorage.getItem('class_weekly_rank_blank_migrated_v1')) {
+      Object.keys(weeklyData).forEach(w => {
+        const wd = weeklyData[w];
+        if (!wd) return;
+        const rbIsDefault = (wd.rankBlock === 1 || wd.rankBlock === "1");
+        const rsIsDefault = (wd.rankSchool === 1 || wd.rankSchool === "1");
+        if (rbIsDefault) wd.rankBlock = "";
+        if (rsIsDefault) wd.rankSchool = "";
+      });
+      localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
+      localStorage.setItem('class_weekly_rank_blank_migrated_v1', '1');
+    }
     let selectedWeek = 1;
 
     // 5. DỮ LIỆU ĐIỂM SỐ HỌC TẬP
@@ -1475,7 +1490,10 @@
       document.getElementById('kpiRankBlock').innerText = rbEmpty ? 'Chưa cập nhật' : `Hạng: ${current.rankBlock}`;
       document.getElementById('kpiRankSchool').innerText = rsEmpty ? 'Chưa cập nhật' : `Hạng: ${current.rankSchool}`;
       const rbDesc = document.getElementById('kpiRankBlockDesc');
-      if (rbDesc) rbDesc.innerText = rbEmpty ? 'Thầy sẽ cập nhật hàng tuần' : '▲ Dẫn đầu khối 12';
+      if (rbDesc) {
+        rbDesc.innerText = rbEmpty ? 'Thầy sẽ cập nhật hàng tuần' : '▲ Dẫn đầu khối 12';
+        rbDesc.className = rbEmpty ? 'text-[11px] text-slate-400 font-medium mt-1' : 'text-[11px] text-emerald-600 font-medium mt-1';
+      }
       document.getElementById('kpiScore').innerHTML = `${current.score} <span class="text-xs font-normal text-slate-400">/ 100đ</span>`;
       document.getElementById('kpiScoreNote').innerText = current.scoreNote;
       document.getElementById('kpiTitle').innerText = current.title;
