@@ -230,12 +230,24 @@
         <div class="flex justify-between items-center mb-4 border-b pb-2">
           <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
             <i class="fa-solid fa-medal text-custom-yellow"></i> Điểm Thi Đua Nội Bộ 4 Tổ (Tuần Đang Chọn)
+            <span class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">Tự động từ Vi Phạm &amp; Điểm Cộng</span>
           </h2>
           <button onclick="openWeeklyModal()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5 transition">
             <i class="fa-solid fa-pen-to-square"></i> Cập nhật điểm 4 tổ
           </button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm" id="groupCardsContainer"></div>
+      </div>
+
+      <!-- So Sánh Thứ Hạng & Thành Tích Theo Từng Học Kỳ (độc lập HK1 / HK2) -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+            <i class="fa-solid fa-scale-balanced text-custom-yellow"></i> Tổng Kết Thứ Hạng Theo Học Kỳ
+          </h2>
+          <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">HK1: Tuần 1-20 • HK2: Tuần 21-40 (tính độc lập)</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="semesterSummaryContainer"></div>
       </div>
     </section>
 
@@ -832,13 +844,19 @@
       </div>
       <form onsubmit="saveSingleGroupScore(event)" class="space-y-4 text-sm">
         <input type="hidden" id="singleGroupKey" />
+        <div class="bg-slate-50 border rounded-xl p-3 text-xs space-y-1">
+          <div class="flex justify-between"><span class="text-slate-500">Điểm tự động (100đ − vi phạm + điểm cộng):</span><strong id="singleGroupAutoScore" class="text-slate-800">100đ</strong></div>
+          <div class="flex justify-between"><span class="text-slate-500">Điều chỉnh thủ công hiện tại:</span><strong id="singleGroupCurrentAdj" class="text-slate-800">0đ</strong></div>
+          <div class="flex justify-between border-t pt-1 mt-1"><span class="text-slate-600 font-semibold">Tổng điểm hiện tại:</span><strong id="singleGroupTotalScore" class="text-emerald-700">100đ</strong></div>
+        </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Điểm thi đua tuần này (Thang 100đ):</label>
-          <input type="number" step="0.5" id="singleGroupScore" min="0" max="100" required class="w-full px-3 py-2 border rounded-lg font-bold text-emerald-700 text-lg focus:ring-2 focus:ring-emerald-600" />
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Điều chỉnh thêm (điểm thưởng/phạt riêng của GVCN, +/-):</label>
+          <input type="number" step="0.5" id="singleGroupScore" required class="w-full px-3 py-2 border rounded-lg font-bold text-emerald-700 text-lg focus:ring-2 focus:ring-emerald-600" />
+          <p class="text-[11px] text-slate-400 mt-1">Điểm chính đã tự động cập nhật theo Sổ Vi Phạm và Điểm Cộng cá nhân trong tuần. Ô này chỉ dùng khi cần cộng/trừ thêm ngoài hệ thống (VD: hoạt động Đoàn trường).</p>
         </div>
         <div class="flex justify-end gap-2 pt-3 border-t">
           <button type="button" onclick="closeSingleGroupModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold">Hủy</button>
-          <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold">Lưu Điểm</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold">Lưu Điều Chỉnh</button>
         </div>
       </form>
     </div>
@@ -861,12 +879,12 @@
           <div><label class="block text-xs font-semibold mb-1">Danh Hiệu</label><input type="text" id="inputTitle" class="w-full px-3 py-2 border rounded-lg" /></div>
           <div><label class="block text-xs font-semibold mb-1">Ghi Chú</label><input type="text" id="inputScoreNote" class="w-full px-3 py-2 border rounded-lg" /></div>
         </div>
-        <div class="pt-2 border-t"><label class="block text-xs font-bold mb-1">Điểm 4 Tổ:</label>
+        <div class="pt-2 border-t"><label class="block text-xs font-bold mb-1">Điều Chỉnh Thêm 4 Tổ (+/-, ngoài phần tự động tính từ Vi Phạm & Điểm Cộng):</label>
           <div class="grid grid-cols-4 gap-2">
-            <div><span class="text-xs text-slate-500">Tổ 1:</span><input type="number" step="0.5" id="inputScoreT1" placeholder="Tổ 1" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
-            <div><span class="text-xs text-slate-500">Tổ 2:</span><input type="number" step="0.5" id="inputScoreT2" placeholder="Tổ 2" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
-            <div><span class="text-xs text-slate-500">Tổ 3:</span><input type="number" step="0.5" id="inputScoreT3" placeholder="Tổ 3" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
-            <div><span class="text-xs text-slate-500">Tổ 4:</span><input type="number" step="0.5" id="inputScoreT4" placeholder="Tổ 4" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
+            <div><span class="text-xs text-slate-500">Tổ 1:</span><input type="number" step="0.5" id="inputScoreT1" placeholder="0" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
+            <div><span class="text-xs text-slate-500">Tổ 2:</span><input type="number" step="0.5" id="inputScoreT2" placeholder="0" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
+            <div><span class="text-xs text-slate-500">Tổ 3:</span><input type="number" step="0.5" id="inputScoreT3" placeholder="0" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
+            <div><span class="text-xs text-slate-500">Tổ 4:</span><input type="number" step="0.5" id="inputScoreT4" placeholder="0" class="w-full px-2 py-1 border rounded text-xs font-bold" /></div>
           </div>
         </div>
         <div class="pt-2 border-t space-y-1">
@@ -1285,7 +1303,7 @@
             `Tuần ${w}: Đồng phục đúng quy định, sơ mi trắng và bảng tên.`,
             `Tuần ${w}: Giữ vững 100% tiết học xếp loại Tốt.`
           ],
-          groupScores: { t1: 100, t2: 100, t3: 100, t4: 100 }
+          groupAdjustments: { t1: 0, t2: 0, t3: 0, t4: 0 }
         };
       }
       return data;
@@ -1397,6 +1415,43 @@
     }
 
     // TAB 1: THI ĐUA LOGIC
+    // Chuyển "Tổ 1".."Tổ 4" (hoặc bất kỳ chuỗi có số ở cuối) thành khóa t1..t4 dùng trong groupScores.
+    function getGroupKeyFromName(groupName) {
+      const m = /([0-9]+)/.exec(groupName || '');
+      return m ? ('t' + m[1]) : null;
+    }
+
+    // Tính điểm thi đua tự động của 4 tổ cho 1 tuần cụ thể:
+    // - Bắt đầu từ 100đ.
+    // - Trừ theo từng vi phạm ghi nhận ở Sổ Tổng Hợp Vi Phạm Rèn Luyện (violations40wData) của tuần đó.
+    // - Cộng theo từng "Điểm Cộng" (khen thưởng) ghi ở mục Rèn Luyện Cá Nhân của thành viên tổ đó trong tuần đó.
+    // - Trừ thêm các "Trừ Điểm" ghi trực tiếp ở Rèn Luyện Cá Nhân mà KHÔNG qua Sổ Vi Phạm (không có vId),
+    //   để không bị trừ trùng 2 lần với các vi phạm đã có trong violations40wData.
+    function calculateAutoGroupScores(week) {
+      const scores = { t1: 100, t2: 100, t3: 100, t4: 100 };
+
+      violations40wData.filter(v => parseInt(v.week) === week).forEach(v => {
+        const key = getGroupKeyFromName(v.group);
+        if (key && scores[key] !== undefined) scores[key] -= (v.points || 0);
+      });
+
+      students.forEach(std => {
+        const key = getGroupKeyFromName(std.group);
+        if (!key || scores[key] === undefined) return;
+        (std.history || []).forEach(h => {
+          const wk = parseInt(h.week) || 1;
+          if (wk !== week) return;
+          if (h.type === 'plus') {
+            scores[key] += (h.points || 0);
+          } else if (h.type === 'minus' && !h.vId) {
+            scores[key] -= (h.points || 0);
+          }
+        });
+      });
+
+      return scores;
+    }
+
     function renderWeekDropdown() {
       const select = document.getElementById('selectWeek');
       if (!select) return;
@@ -1455,12 +1510,20 @@
         </div>
       `;
 
-      const gs = current.groupScores || { t1: 100, t2: 100, t3: 100, t4: 100 };
+      // Điểm 4 tổ = điểm tự động (100đ - vi phạm + điểm cộng của tuần) + điều chỉnh thủ công (nếu có) của GVCN
+      const autoScores = calculateAutoGroupScores(selectedWeek);
+      const adj = current.groupAdjustments || { t1: 0, t2: 0, t3: 0, t4: 0 };
+      const gs = {
+        t1: autoScores.t1 + (parseFloat(adj.t1) || 0),
+        t2: autoScores.t2 + (parseFloat(adj.t2) || 0),
+        t3: autoScores.t3 + (parseFloat(adj.t3) || 0),
+        t4: autoScores.t4 + (parseFloat(adj.t4) || 0)
+      };
       document.getElementById('groupCardsContainer').innerHTML = `
         <div class="p-4 rounded-2xl border-2 border-emerald-400 bg-white shadow-sm flex flex-col justify-between">
           <div class="flex justify-between items-center">
             <span class="font-bold text-slate-900 text-base">Tổ 1</span>
-            <button onclick="openSingleGroupModal('t1', 'Tổ 1', ${gs.t1})" class="text-xs text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
+            <button onclick="openSingleGroupModal('t1', 'Tổ 1')" class="text-xs text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
               <i class="fa-solid fa-pen text-[11px]"></i> Sửa
             </button>
           </div>
@@ -1470,7 +1533,7 @@
         <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 shadow-sm flex flex-col justify-between">
           <div class="flex justify-between items-center">
             <span class="font-bold text-slate-900 text-base">Tổ 2</span>
-            <button onclick="openSingleGroupModal('t2', 'Tổ 2', ${gs.t2})" class="text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
+            <button onclick="openSingleGroupModal('t2', 'Tổ 2')" class="text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
               <i class="fa-solid fa-pen text-[11px]"></i> Sửa
             </button>
           </div>
@@ -1480,7 +1543,7 @@
         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm flex flex-col justify-between">
           <div class="flex justify-between items-center">
             <span class="font-bold text-slate-900 text-base">Tổ 3</span>
-            <button onclick="openSingleGroupModal('t3', 'Tổ 3', ${gs.t3})" class="text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
+            <button onclick="openSingleGroupModal('t3', 'Tổ 3')" class="text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
               <i class="fa-solid fa-pen text-[11px]"></i> Sửa
             </button>
           </div>
@@ -1490,7 +1553,7 @@
         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm flex flex-col justify-between">
           <div class="flex justify-between items-center">
             <span class="font-bold text-slate-900 text-base">Tổ 4</span>
-            <button onclick="openSingleGroupModal('t4', 'Tổ 4', ${gs.t4})" class="text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
+            <button onclick="openSingleGroupModal('t4', 'Tổ 4')" class="text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium flex items-center gap-1">
               <i class="fa-solid fa-pen text-[11px]"></i> Sửa
             </button>
           </div>
@@ -1498,12 +1561,77 @@
         </div>
       `;
       applyPermissions();
+      renderSemesterSummary();
     }
 
-    function openSingleGroupModal(key, title, currentScore) {
+    // Tổng kết riêng biệt cho Học Kỳ 1 (Tuần 1-20) và Học Kỳ 2 (Tuần 21-40):
+    // điểm trung bình, hạng khối/trường tốt nhất & trung bình, số tuần đạt Cờ Luân Lưu,
+    // tổng vi phạm và tổng điểm cộng cá nhân toàn lớp trong từng học kỳ - KHÔNG cộng dồn giữa 2 kỳ.
+    function renderSemesterSummary() {
+      const container = document.getElementById('semesterSummaryContainer');
+      if (!container) return;
+
+      function summarize(weekStart, weekEnd, label, colorCls) {
+        let scores = [], ranksBlock = [], ranksSchool = [], coLuanLuuCount = 0;
+        for (let w = weekStart; w <= weekEnd; w++) {
+          const wd = weeklyData[w];
+          if (!wd) continue;
+          const sc = parseFloat(wd.score);
+          if (!isNaN(sc)) scores.push(sc);
+          const rb = parseFloat(wd.rankBlock);
+          if (!isNaN(rb)) ranksBlock.push(rb);
+          const rs = parseFloat(wd.rankSchool);
+          if (!isNaN(rs)) ranksSchool.push(rs);
+          if ((wd.title || '').trim() === 'Cờ Luân Lưu') coLuanLuuCount++;
+        }
+        const avg = arr => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+        const best = arr => arr.length ? Math.min(...arr) : null;
+
+        const totalViolations = violations40wData.filter(v => parseInt(v.week) >= weekStart && parseInt(v.week) <= weekEnd).length;
+        let totalPlusCount = 0;
+        students.forEach(std => {
+          (std.history || []).forEach(h => {
+            const wk = parseInt(h.week) || 1;
+            if (wk >= weekStart && wk <= weekEnd && h.type === 'plus') totalPlusCount++;
+          });
+        });
+
+        const avgScore = avg(scores);
+        const bestRankBlock = best(ranksBlock);
+        const avgRankBlock = avg(ranksBlock);
+        const bestRankSchool = best(ranksSchool);
+        const avgRankSchool = avg(ranksSchool);
+
+        return `
+          <div class="p-4 rounded-2xl border-2 ${colorCls} space-y-2.5">
+            <div class="font-bold text-slate-900 text-sm mb-1">${label}</div>
+            <div class="flex justify-between text-xs"><span class="text-slate-500">Điểm thi đua trung bình</span><strong class="text-emerald-700">${avgScore !== null ? avgScore.toFixed(1) : '--'} đ</strong></div>
+            <div class="flex justify-between text-xs"><span class="text-slate-500">Hạng khối tốt nhất / trung bình</span><strong class="text-slate-800">${bestRankBlock ?? '--'} / ${avgRankBlock !== null ? avgRankBlock.toFixed(1) : '--'}</strong></div>
+            <div class="flex justify-between text-xs"><span class="text-slate-500">Hạng trường tốt nhất / trung bình</span><strong class="text-slate-800">${bestRankSchool ?? '--'} / ${avgRankSchool !== null ? avgRankSchool.toFixed(1) : '--'}</strong></div>
+            <div class="flex justify-between text-xs"><span class="text-slate-500">Số tuần đạt Cờ Luân Lưu</span><strong class="text-amber-600">${coLuanLuuCount} tuần</strong></div>
+            <div class="flex justify-between text-xs border-t pt-2 mt-1"><span class="text-slate-500">Tổng vi phạm rèn luyện</span><strong class="text-rose-600">${totalViolations} lượt</strong></div>
+            <div class="flex justify-between text-xs"><span class="text-slate-500">Tổng điểm cộng cá nhân (khen thưởng)</span><strong class="text-emerald-600">${totalPlusCount} lượt</strong></div>
+          </div>
+        `;
+      }
+
+      container.innerHTML =
+        summarize(1, 20, 'Học Kỳ 1 (Tuần 1 - 20)', 'border-emerald-300 bg-emerald-50/40') +
+        summarize(21, 40, 'Học Kỳ 2 (Tuần 21 - 40)', 'border-cyan-300 bg-cyan-50/40');
+    }
+
+    function openSingleGroupModal(key, title) {
+      const current = weeklyData[selectedWeek] || init40WeeksWeeklyData()[selectedWeek];
+      const autoScores = calculateAutoGroupScores(selectedWeek);
+      const adj = current.groupAdjustments || { t1: 0, t2: 0, t3: 0, t4: 0 };
+      const autoScore = autoScores[key];
+      const currentAdj = parseFloat(adj[key]) || 0;
       document.getElementById('singleGroupKey').value = key;
       document.getElementById('singleGroupTitle').innerText = `Chấm Điểm ${title} (Tuần ${selectedWeek})`;
-      document.getElementById('singleGroupScore').value = currentScore;
+      document.getElementById('singleGroupAutoScore').innerText = `${autoScore}đ`;
+      document.getElementById('singleGroupCurrentAdj').innerText = `${currentAdj >= 0 ? '+' : ''}${currentAdj}đ`;
+      document.getElementById('singleGroupTotalScore').innerText = `${autoScore + currentAdj}đ`;
+      document.getElementById('singleGroupScore').value = currentAdj;
       document.getElementById('editSingleGroupModal').classList.remove('hidden');
       document.getElementById('editSingleGroupModal').classList.add('flex');
     }
@@ -1511,10 +1639,10 @@
     function saveSingleGroupScore(e) {
       e.preventDefault();
       const key = document.getElementById('singleGroupKey').value;
-      const score = parseFloat(document.getElementById('singleGroupScore').value);
+      const adjValue = parseFloat(document.getElementById('singleGroupScore').value) || 0;
       if (!weeklyData[selectedWeek]) weeklyData[selectedWeek] = init40WeeksWeeklyData()[selectedWeek];
-      if (!weeklyData[selectedWeek].groupScores) weeklyData[selectedWeek].groupScores = { t1: 100, t2: 100, t3: 100, t4: 100 };
-      weeklyData[selectedWeek].groupScores[key] = score;
+      if (!weeklyData[selectedWeek].groupAdjustments) weeklyData[selectedWeek].groupAdjustments = { t1: 0, t2: 0, t3: 0, t4: 0 };
+      weeklyData[selectedWeek].groupAdjustments[key] = adjValue;
       localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
       syncToCloud(); // FIX: bổ sung đồng bộ cloud
       renderWeeklyView();
@@ -1532,10 +1660,10 @@
       document.getElementById('inputNote1').value = current.notes ? current.notes[0] : '';
       document.getElementById('inputNote2').value = current.notes ? current.notes[1] : '';
       document.getElementById('inputNote3').value = current.notes ? current.notes[2] : '';
-      document.getElementById('inputScoreT1').value = current.groupScores?.t1 || 100;
-      document.getElementById('inputScoreT2').value = current.groupScores?.t2 || 100;
-      document.getElementById('inputScoreT3').value = current.groupScores?.t3 || 100;
-      document.getElementById('inputScoreT4').value = current.groupScores?.t4 || 100;
+      document.getElementById('inputScoreT1').value = current.groupAdjustments?.t1 || 0;
+      document.getElementById('inputScoreT2').value = current.groupAdjustments?.t2 || 0;
+      document.getElementById('inputScoreT3').value = current.groupAdjustments?.t3 || 0;
+      document.getElementById('inputScoreT4').value = current.groupAdjustments?.t4 || 0;
       document.getElementById('weeklyModal').classList.remove('hidden');
       document.getElementById('weeklyModal').classList.add('flex');
     }
@@ -1550,9 +1678,11 @@
         title: document.getElementById('inputTitle').value,
         scoreNote: document.getElementById('inputScoreNote').value,
         notes: [document.getElementById('inputNote1').value, document.getElementById('inputNote2').value, document.getElementById('inputNote3').value],
-        groupScores: {
-          t1: document.getElementById('inputScoreT1').value, t2: document.getElementById('inputScoreT2').value,
-          t3: document.getElementById('inputScoreT3').value, t4: document.getElementById('inputScoreT4').value
+        groupAdjustments: {
+          t1: parseFloat(document.getElementById('inputScoreT1').value) || 0,
+          t2: parseFloat(document.getElementById('inputScoreT2').value) || 0,
+          t3: parseFloat(document.getElementById('inputScoreT3').value) || 0,
+          t4: parseFloat(document.getElementById('inputScoreT4').value) || 0
         }
       };
       localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
@@ -1565,7 +1695,7 @@
           semester: selectedWeek <= 20 ? "Học Kỳ 1" : "Học Kỳ 2",
           rankBlock: "1", rankSchool: "1", score: 100, title: "Cờ Luân Lưu", scoreNote: "0 vi phạm",
           notes: ["Có mặt trước 06:40", "Đồng phục đúng quy định", "100% giờ Tốt"],
-          groupScores: { t1: 100, t2: 100, t3: 100, t4: 100 }
+          groupAdjustments: { t1: 0, t2: 0, t3: 0, t4: 0 }
         };
         localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
       syncToCloud(); // FIX: bổ sung đồng bộ cloud
