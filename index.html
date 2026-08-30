@@ -1313,18 +1313,22 @@
     let weeklyData = JSON.parse(localStorage.getItem('class_weekly_40w_full_12a1')) || init40WeeksWeeklyData();
     // Di chuyển dữ liệu cũ: các tuần chưa từng được GVCN cập nhật (vẫn còn Hạng #1 mặc định)
     // sẽ được đưa về trạng thái "để trống - chưa cập nhật" đúng như mong muốn ban đầu.
-    // Chỉ chạy 1 lần duy nhất để không xóa mất số liệu thật mà GVCN đã nhập là hạng #1.
-    if (!localStorage.getItem('class_weekly_rank_blank_migrated_v1')) {
-      Object.keys(weeklyData).forEach(w => {
-        const wd = weeklyData[w];
+    // Hàm này được gọi lại mỗi khi có dữ liệu mới tải về từ trang tính (cloud), vì bản trên
+    // trang tính vẫn có thể còn lưu Hạng #1 mặc định cũ và sẽ ghi đè lại nếu không dọn lại.
+    function migrateDefaultRanksToBlank(data) {
+      let changed = false;
+      Object.keys(data).forEach(w => {
+        const wd = data[w];
         if (!wd) return;
         const rbIsDefault = (wd.rankBlock === 1 || wd.rankBlock === "1");
         const rsIsDefault = (wd.rankSchool === 1 || wd.rankSchool === "1");
-        if (rbIsDefault) wd.rankBlock = "";
-        if (rsIsDefault) wd.rankSchool = "";
+        if (rbIsDefault) { wd.rankBlock = ""; changed = true; }
+        if (rsIsDefault) { wd.rankSchool = ""; changed = true; }
       });
+      return changed;
+    }
+    if (migrateDefaultRanksToBlank(weeklyData)) {
       localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
-      localStorage.setItem('class_weekly_rank_blank_migrated_v1', '1');
     }
     let selectedWeek = 1;
 
@@ -3278,6 +3282,12 @@ async function loadDataFromCloud(force = false) {
       }
       if (typeof weeklyData !== 'undefined' && localStorage.getItem('class_weekly_40w_full_12a1')) {
         weeklyData = JSON.parse(localStorage.getItem('class_weekly_40w_full_12a1'));
+        // Dọn lại các tuần vẫn còn Hạng #1 mặc định cũ từ trang tính về trạng thái để trống.
+        // Nếu có thay đổi, đẩy ngược bản đã dọn lên lại trang tính để lần tải sau không bị đè lại.
+        if (typeof migrateDefaultRanksToBlank === 'function' && migrateDefaultRanksToBlank(weeklyData)) {
+          localStorage.setItem('class_weekly_40w_full_12a1', JSON.stringify(weeklyData));
+          setTimeout(() => { if (typeof syncToCloud === 'function') syncToCloud(); }, 500);
+        }
       }
       if (typeof duty40WeeksData !== 'undefined' && localStorage.getItem('class_duty_40w_12a1')) {
         duty40WeeksData = JSON.parse(localStorage.getItem('class_duty_40w_12a1'));
