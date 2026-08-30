@@ -683,6 +683,9 @@
           <p class="text-xs text-emerald-100 mt-1">Mô phỏng chuẩn quy cách phòng học: 4 Dãy, 6 Hàng (Bàn 2 Chỗ Ngồi), tích hợp sửa & đổi vị trí nhanh</p>
         </div>
         <div class="flex gap-2">
+          <button onclick="exportSeatingToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <i class="fa-solid fa-file-excel"></i> Xuất Excel Để In
+          </button>
           <button onclick="clearAllSeats()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
             <i class="fa-solid fa-rotate-left"></i> Đặt Lại Sơ Đồ
           </button>
@@ -1168,7 +1171,7 @@
     const TOTAL_WEEKS = 40;
 // --- CẤU HÌNH ĐÁM MÂY ---
     // ⚠️ DÁN URL Apps Script (.../exec) sau khi Deploy vào đây. Để trống nghĩa là chưa kết nối cloud.
-    const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzuEdo9xezE2pMU0vdsYcn6snWZJx_WJMEjKg1eUC2OU6ZNXgLhBJN6tJzSFDjRi4JZAw/exec";
+    const GOOGLE_SHEET_API_URL = "DÁN_URL_APPS_SCRIPT_VÀO_ĐÂY";
     // Lưu ý bảo mật: token này CHỈ mang tính giảm thiểu, không phải bảo mật tuyệt đối,
     // vì mã nguồn phía client luôn có thể bị xem được. Muốn an toàn thật sự, Apps Script
     // (doPost) phải tự kiểm tra token này trước khi cho phép ghi/đọc dữ liệu.
@@ -3093,6 +3096,59 @@ setInterval(() => loadDataFromCloud(false), 15000);
     }
 
     // XUẤT EXCEL
+    // Xuất sơ đồ chỗ ngồi ra file Excel (.xls) để in, giữ đúng bố cục 4 dãy x 6 bàn
+    function exportSeatingToExcel() {
+      const rowsConfig = [
+        { label: "DÃY 1 (Cửa sổ)", key: "row1" },
+        { label: "DÃY 2 (Giữa trái)", key: "row2" },
+        { label: "DÃY 3 (Giữa phải)", key: "row3" },
+        { label: "DÃY 4 (Cửa chính)", key: "row4" }
+      ];
+
+      let htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            table { border-collapse: collapse; width: 100%; font-family: 'Times New Roman', Times, serif; }
+            th { background-color: #0b3d2c; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 8px; text-align: center; }
+            td { border: 1px solid #000000; padding: 10px; text-align: center; vertical-align: middle; font-size: 13px; }
+            .board { background-color: #e2e8f0; font-weight: bold; text-align: center; padding: 8px; border: 1px solid #000000; }
+            .desk-label { background-color: #f1f5f9; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h2 style="text-align:center;">SƠ ĐỒ VỊ TRÍ CHỖ NGỒI LỚP 12A1</h2>
+          <table>
+            <tr><td class="board" colspan="${rowsConfig.length}">BÀN GIÁO VIÊN &amp; BẢNG TỪ PHÒNG HỌC</td></tr>
+            <tr>
+      `;
+      rowsConfig.forEach(r => { htmlContent += `<th>${r.label}</th>`; });
+      htmlContent += `</tr>`;
+
+      for (let deskIdx = 0; deskIdx < 6; deskIdx++) {
+        htmlContent += `<tr>`;
+        rowsConfig.forEach(r => {
+          const desks = seatingData[r.key] || [];
+          const desk = desks[deskIdx] || ["Trống", "Trống"];
+          const s1 = escapeHtml(desk[0] || "Trống");
+          const s2 = escapeHtml(desk[1] || "Trống");
+          htmlContent += `<td><span class="desk-label">Bàn ${deskIdx + 1}</span><br>${s1}<br>${s2}</td>`;
+        });
+        htmlContent += `</tr>`;
+      }
+
+      htmlContent += `</table></body></html>`;
+
+      const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `SoDo_ChoNgoi_12A1.xls`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     function exportViolationsToExcel(mode) {
       let filteredRecords = [];
       let fileName = "";
