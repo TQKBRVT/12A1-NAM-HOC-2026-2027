@@ -50,7 +50,7 @@
       <!-- Danh sách menu chức năng bố trí dọc -->
       <nav class="p-3 space-y-1.5 text-xs font-medium">
         <button id="nav-thuhang" onclick="switchTab('thuhang')" class="tab-btn tab-btn-active w-full px-3.5 py-3 rounded-xl flex items-center gap-3 transition text-left">
-          <i class="fa-solid fa-ranking-star w-4 text-center"></i> Thứ hạng trường-khối-Lớp/Tổ
+          <i class="fa-solid fa-ranking-star w-4 text-center"></i> Thứ hạng trường & khối
         </button>
         <button id="nav-vipham" onclick="switchTab('vipham')" class="tab-btn w-full px-3.5 py-3 rounded-xl text-emerald-100/80 hover:bg-emerald-800/50 hover:text-white flex items-center gap-3 transition text-left">
           <i class="fa-solid fa-triangle-exclamation w-4 text-center text-amber-400"></i> Vi phạm rèn luyện
@@ -152,7 +152,7 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs text-slate-500 font-medium">Hạng Trong Khối 12</p>
-            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankBlock">Hạng  </h3>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankBlock">Hạng: 1</h3>
             <p class="text-[11px] text-emerald-600 font-medium mt-1" id="kpiRankBlockDesc">▲ Dẫn đầu khối 12</p>
           </div>
           <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold">
@@ -163,7 +163,7 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs text-slate-500 font-medium">Hạng Toàn Trường THPT</p>
-            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankSchool">Hạng  </h3>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpiRankSchool">Hạng: 1</h3>
             <p class="text-[11px] text-slate-400 mt-1">Toàn trường</p>
           </div>
           <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
@@ -248,6 +248,8 @@
           <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">HK1: Tuần 1-20 • HK2: Tuần 21-40 (tính độc lập)</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="semesterSummaryContainer"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6" id="semesterWeeklyTablesContainer"></div>
       </div>
     </section>
 
@@ -1297,7 +1299,7 @@
       for (let w = 1; w <= TOTAL_WEEKS; w++) {
         data[w] = {
           semester: w <= 20 ? "Học Kỳ 1" : "Học Kỳ 2",
-          rankBlock: 1, rankSchool: 1, score: 100.0, title: "Cờ Luân Lưu", scoreNote: "0 vi phạm",
+          rankBlock: "", rankSchool: "", score: 100.0, title: "Cờ Luân Lưu", scoreNote: "0 vi phạm",
           notes: [
             `Tuần ${w}: Toàn thể 12A1 có mặt trước 06:40 truy bài.`,
             `Tuần ${w}: Đồng phục đúng quy định, sơ mi trắng và bảng tên.`,
@@ -1468,8 +1470,12 @@
       const current = weeklyData[selectedWeek] || init40WeeksWeeklyData()[selectedWeek];
       const semester = selectedWeek <= 20 ? "Học Kỳ 1" : "Học Kỳ 2";
       document.getElementById('displayWeekBadge').innerText = `THI ĐUA KHỐI 12 • TUẦN ${selectedWeek} - ${semester.toUpperCase()}`;
-      document.getElementById('kpiRankBlock').innerText = `Hạng #${current.rankBlock}`;
-      document.getElementById('kpiRankSchool').innerText = `Hạng #${current.rankSchool}`;
+      const rbEmpty = current.rankBlock === "" || current.rankBlock === undefined || current.rankBlock === null;
+      const rsEmpty = current.rankSchool === "" || current.rankSchool === undefined || current.rankSchool === null;
+      document.getElementById('kpiRankBlock').innerText = rbEmpty ? 'Chưa cập nhật' : `Hạng: ${current.rankBlock}`;
+      document.getElementById('kpiRankSchool').innerText = rsEmpty ? 'Chưa cập nhật' : `Hạng: ${current.rankSchool}`;
+      const rbDesc = document.getElementById('kpiRankBlockDesc');
+      if (rbDesc) rbDesc.innerText = rbEmpty ? 'Thầy sẽ cập nhật hàng tuần' : '▲ Dẫn đầu khối 12';
       document.getElementById('kpiScore').innerHTML = `${current.score} <span class="text-xs font-normal text-slate-400">/ 100đ</span>`;
       document.getElementById('kpiScoreNote').innerText = current.scoreNote;
       document.getElementById('kpiTitle').innerText = current.title;
@@ -1498,7 +1504,7 @@
         <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-300 space-y-3">
           <div class="flex justify-between items-center text-sm font-bold">
             <span class="text-emerald-950">Tuần ${selectedWeek} (${semester})</span>
-            <span class="text-emerald-700 bg-white px-3 py-1 rounded-full border border-emerald-300 shadow-sm">${current.score} Điểm • Hạng #${current.rankBlock} Khối</span>
+            <span class="text-emerald-700 bg-white px-3 py-1 rounded-full border border-emerald-300 shadow-sm">${current.score} Điểm • ${rbEmpty ? 'Hạng Khối: Chưa cập nhật' : `Hạng Khối: ${current.rankBlock}`}</span>
           </div>
           <div class="w-full bg-slate-200 h-3.5 rounded-full overflow-hidden">
             <div class="bg-emerald-600 h-full rounded-full transition-all duration-500" style="width: ${current.score}%"></div>
@@ -1582,12 +1588,11 @@
           if (!isNaN(rb)) ranksBlock.push(rb);
           const rs = parseFloat(wd.rankSchool);
           if (!isNaN(rs)) ranksSchool.push(rs);
-          if ((wd.title || '').trim() === 'Cờ Luân Lưu') coLuanLuuCount++;
+          if (rs >= 1 && rs <= 3) coLuanLuuCount++;
         }
         const avg = arr => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
         const best = arr => arr.length ? Math.min(...arr) : null;
 
-        const totalViolations = violations40wData.filter(v => parseInt(v.week) >= weekStart && parseInt(v.week) <= weekEnd).length;
         let totalPlusCount = 0;
         students.forEach(std => {
           (std.history || []).forEach(h => {
@@ -1608,8 +1613,7 @@
             <div class="flex justify-between text-xs"><span class="text-slate-500">Điểm thi đua trung bình</span><strong class="text-emerald-700">${avgScore !== null ? avgScore.toFixed(1) : '--'} đ</strong></div>
             <div class="flex justify-between text-xs"><span class="text-slate-500">Hạng khối tốt nhất / trung bình</span><strong class="text-slate-800">${bestRankBlock ?? '--'} / ${avgRankBlock !== null ? avgRankBlock.toFixed(1) : '--'}</strong></div>
             <div class="flex justify-between text-xs"><span class="text-slate-500">Hạng trường tốt nhất / trung bình</span><strong class="text-slate-800">${bestRankSchool ?? '--'} / ${avgRankSchool !== null ? avgRankSchool.toFixed(1) : '--'}</strong></div>
-            <div class="flex justify-between text-xs"><span class="text-slate-500">Số tuần đạt Cờ Luân Lưu</span><strong class="text-amber-600">${coLuanLuuCount} tuần</strong></div>
-            <div class="flex justify-between text-xs border-t pt-2 mt-1"><span class="text-slate-500">Tổng vi phạm rèn luyện</span><strong class="text-rose-600">${totalViolations} lượt</strong></div>
+            <div class="flex justify-between text-xs border-t pt-2 mt-1"><span class="text-slate-500">Số tuần đạt Cờ Luân Lưu (tự động khi Hạng Trường 1-3)</span><strong class="text-amber-600">${coLuanLuuCount} tuần</strong></div>
             <div class="flex justify-between text-xs"><span class="text-slate-500">Tổng điểm cộng cá nhân (khen thưởng)</span><strong class="text-emerald-600">${totalPlusCount} lượt</strong></div>
           </div>
         `;
@@ -1618,6 +1622,45 @@
       container.innerHTML =
         summarize(1, 20, 'Học Kỳ 1 (Tuần 1 - 20)', 'border-emerald-300 bg-emerald-50/40') +
         summarize(21, 40, 'Học Kỳ 2 (Tuần 21 - 40)', 'border-cyan-300 bg-cyan-50/40');
+
+      function buildWeeklyTable(weekStart, weekEnd, label, headerCls) {
+        let rows = '';
+        for (let w = weekStart; w <= weekEnd; w++) {
+          const wd = weeklyData[w];
+          const score = wd && wd.score !== undefined && wd.score !== '' ? wd.score : '--';
+          const rSchool = wd && wd.rankSchool !== undefined && wd.rankSchool !== '' && wd.rankSchool !== null
+            ? `Hạng: ${wd.rankSchool}` : 'Chưa cập nhật';
+          rows += `
+            <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/70">
+              <td class="px-3 py-1.5 text-slate-600 font-medium">Tuần ${w}</td>
+              <td class="px-3 py-1.5 text-right text-emerald-700 font-semibold">${score}${score !== '--' ? 'đ' : ''}</td>
+              <td class="px-3 py-1.5 text-right ${rSchool === 'Chưa cập nhật' ? 'text-slate-400 italic' : 'text-slate-800 font-semibold'}">${rSchool}</td>
+            </tr>`;
+        }
+        return `
+          <div class="rounded-2xl border border-slate-200 overflow-hidden">
+            <div class="px-4 py-2.5 ${headerCls} font-bold text-sm text-white">${label}</div>
+            <div class="max-h-80 overflow-y-auto">
+              <table class="w-full text-xs">
+                <thead class="sticky top-0 bg-slate-50 text-slate-500">
+                  <tr>
+                    <th class="px-3 py-2 text-left font-semibold">Tuần</th>
+                    <th class="px-3 py-2 text-right font-semibold">Điểm Thi Đua</th>
+                    <th class="px-3 py-2 text-right font-semibold">Hạng Toàn Trường (Đoàn)</th>
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+
+      const tablesContainer = document.getElementById('semesterWeeklyTablesContainer');
+      if (tablesContainer) {
+        tablesContainer.innerHTML =
+          buildWeeklyTable(1, 20, 'Học Kỳ 1 — Tuần 1 đến Tuần 20', 'bg-emerald-700') +
+          buildWeeklyTable(21, 40, 'Học Kỳ 2 — Tuần 21 đến Tuần 40', 'bg-cyan-700');
+      }
     }
 
     function openSingleGroupModal(key, title) {
@@ -1693,7 +1736,7 @@
       if (confirm(`Thầy có chắc chắn muốn đặt lại dữ liệu thi đua của Tuần ${selectedWeek}?`)) {
         weeklyData[selectedWeek] = {
           semester: selectedWeek <= 20 ? "Học Kỳ 1" : "Học Kỳ 2",
-          rankBlock: "1", rankSchool: "1", score: 100, title: "Cờ Luân Lưu", scoreNote: "0 vi phạm",
+          rankBlock: "", rankSchool: "", score: 100, title: "Cờ Luân Lưu", scoreNote: "0 vi phạm",
           notes: ["Có mặt trước 06:40", "Đồng phục đúng quy định", "100% giờ Tốt"],
           groupAdjustments: { t1: 0, t2: 0, t3: 0, t4: 0 }
         };
