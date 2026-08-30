@@ -557,6 +557,12 @@
           <select id="studentSelect" onchange="onSelectStudentChange()" class="border px-3 py-2 rounded-xl text-sm"></select>
         </div>
       </div>
+
+      <div class="bg-white rounded-2xl p-2 shadow-sm border flex items-center gap-2 w-fit">
+        <span class="text-xs font-semibold text-slate-500 pl-2">Xem điểm theo học kỳ:</span>
+        <button id="btnRenLuyenHK1" onclick="setRenLuyenSemester(1)" class="px-4 py-2 rounded-xl text-xs font-bold transition">Học Kỳ 1 (Tuần 1-20)</button>
+        <button id="btnRenLuyenHK2" onclick="setRenLuyenSemester(2)" class="px-4 py-2 rounded-xl text-xs font-bold transition">Học Kỳ 2 (Tuần 21-40)</button>
+      </div>
       
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div class="bg-white p-5 rounded-2xl border shadow-sm"><div><p class="text-xs text-slate-500">Điểm Rèn Luyện</p><h3 class="text-2xl font-bold text-slate-800 mt-1" id="statScore">100</h3></div></div>
@@ -601,6 +607,15 @@
         
         <div class="flex items-center gap-2">
           <select id="selectAttendanceWeek" onchange="onAttendanceWeekChange()" class="bg-[#0b3d2c] text-white font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-emerald-600/70 focus:outline-none focus:ring-2 focus:ring-amber-400"></select>
+          <button onclick="exportAttendanceToExcel('week')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất danh sách chuyên cần của tuần đang chọn">
+            <i class="fa-solid fa-file-excel"></i> Xuất Excel (Tuần)
+          </button>
+          <button onclick="exportAttendanceToExcel('hk1')" class="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất toàn bộ chuyên cần Học Kỳ 1">
+            <i class="fa-solid fa-download"></i> Xuất HK1
+          </button>
+          <button onclick="exportAttendanceToExcel('hk2')" class="bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất toàn bộ chuyên cần Học Kỳ 2">
+            <i class="fa-solid fa-download"></i> Xuất HK2
+          </button>
           <button onclick="openAddAttendanceModal()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-1.5">
             <i class="fa-solid fa-calendar-plus"></i> Ghi Nhận Điểm Danh
           </button>
@@ -1310,6 +1325,9 @@
       { id: 1, week: 1, studentId: 1, name: "Đặng Thị Kim Anh", group: "Tổ 1", date: "2026-09-07", status: "Có phép", note: "Khám sức khỏe định kỳ" }
     ];
     let currentAttendanceWeek = 1;
+    // Học kỳ đang xem ở tab Rèn Luyện & Theo Dõi Cá Nhân: 1 = HK1 (Tuần 1-20), 2 = HK2 (Tuần 21-40).
+    // Mỗi học kỳ tính điểm rèn luyện ĐỘC LẬP, luôn bắt đầu lại từ 50 điểm - khớp với logic bảng xuất Excel.
+    let renLuyenSemester = 1;
 
     // 8. DỮ LIỆU VI PHẠM RÈN LUYỆN 40 TUẦN
     let violations40wData = JSON.parse(localStorage.getItem('class_violations_40w_12a1')) || [
@@ -2786,8 +2804,24 @@
       if (found) { currentStudentId = found.id; renderRenLuyenModule(); }
       else alert("Không tìm thấy học sinh!");
     }
+    function setRenLuyenSemester(sem) {
+      renLuyenSemester = sem;
+      renderRenLuyenModule();
+    }
+
+    function updateRenLuyenSemesterButtons() {
+      const btn1 = document.getElementById('btnRenLuyenHK1');
+      const btn2 = document.getElementById('btnRenLuyenHK2');
+      if (!btn1 || !btn2) return;
+      const activeCls = "bg-emerald-700 text-white";
+      const inactiveCls = "bg-slate-100 text-slate-600 hover:bg-slate-200";
+      btn1.className = `px-4 py-2 rounded-xl text-xs font-bold transition ${renLuyenSemester === 1 ? activeCls : inactiveCls}`;
+      btn2.className = `px-4 py-2 rounded-xl text-xs font-bold transition ${renLuyenSemester === 2 ? activeCls : inactiveCls}`;
+    }
+
     function renderRenLuyenModule() {
       populateStudentSelect();
+      updateRenLuyenSemesterButtons();
       const std = students.find(s => s.id === currentStudentId);
       if (!std) {
         document.getElementById('infoName').innerText = "--";
@@ -2801,7 +2835,17 @@
       document.getElementById('infoGroup').innerText = std.group;
       document.getElementById('infoCode').innerText = std.code;
 
-      const history = std.history || [];
+      // Chỉ lấy các đánh giá thuộc học kỳ đang chọn: HK1 = Tuần 1-20, HK2 = Tuần 21-40.
+      // Bản ghi cũ chưa có tuần (trước khi có tính năng chọn tuần) mặc định tính vào Tuần 1 (HK1).
+      // Giữ lại chỉ số gốc (origIndex) trong std.history để nút Sửa/Xóa luôn thao tác đúng dòng.
+      const weekStart = renLuyenSemester === 1 ? 1 : 21;
+      const weekEnd = renLuyenSemester === 1 ? 20 : 40;
+      const history = (std.history || [])
+        .map((h, origIndex) => ({ ...h, origIndex }))
+        .filter(h => {
+          const wk = parseInt(h.week) || 1;
+          return wk >= weekStart && wk <= weekEnd;
+        });
       let totalPlus = 0, totalMinus = 0, score = 50;
       history.forEach(item => {
         if (item.type === 'plus') { totalPlus++; score += item.points; }
@@ -2831,11 +2875,11 @@
       const tbody = document.getElementById('historyTableBody');
       tbody.innerHTML = '';
       if (history.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Chưa có dữ liệu đánh giá rèn luyện</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">Chưa có dữ liệu đánh giá rèn luyện trong Học Kỳ ${renLuyenSemester}</td></tr>`;
         applyPermissions();
         return;
       }
-      history.forEach((h, index) => {
+      history.forEach((h) => {
         const row = document.createElement('tr');
         row.className = "border-b hover:bg-slate-50 transition";
         const wk = parseInt(h.week) || 1;
@@ -2847,8 +2891,8 @@
           <td class="py-3 px-4 text-center font-bold ${h.type === 'plus' ? 'text-emerald-600' : 'text-rose-600'}">${h.type === 'plus' ? '+' : '-'}${h.points}</td>
           <td class="py-3 px-4 text-center">
             <div class="flex items-center justify-center gap-1.5">
-              <button onclick="openEditHistoryModal(${index})" class="text-emerald-700 hover:text-emerald-900 p-1 rounded hover:bg-emerald-50 transition" title="Sửa đánh giá"><i class="fa-solid fa-pen"></i></button>
-              <button onclick="deleteHistoryRecord(${index})" class="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition" title="Xóa đánh giá"><i class="fa-regular fa-trash-can"></i></button>
+              <button onclick="openEditHistoryModal(${h.origIndex})" class="text-emerald-700 hover:text-emerald-900 p-1 rounded hover:bg-emerald-50 transition" title="Sửa đánh giá"><i class="fa-solid fa-pen"></i></button>
+              <button onclick="deleteHistoryRecord(${h.origIndex})" class="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition" title="Xóa đánh giá"><i class="fa-regular fa-trash-can"></i></button>
             </div>
           </td>
         `;
@@ -3394,7 +3438,114 @@ setInterval(() => loadDataFromCloud(false), 15000);
       alert(`✅ Đã xuất thành công file Excel có sẵn kẻ khung (${fileName})!`);
     }
 
-   // KHỞI TẠO HỆ THỐNG & ĐỒNG BỘ ĐÁM MÂY TỰ ĐỘNG KHI MỞ TRANG
+    // Xuất danh sách điểm danh/chuyên cần (học sinh nghỉ có phép, không phép, đi muộn)
+    // theo Tuần đang chọn, hoặc theo cả Học Kỳ 1 (Tuần 1-20) / Học Kỳ 2 (Tuần 21-40).
+    function exportAttendanceToExcel(mode) {
+      let filteredRecords = [];
+      let fileName = "";
+      let rangeLabel = "";
+
+      if (mode === 'week') {
+        filteredRecords = attendanceData.filter(item => parseInt(item.week) === currentAttendanceWeek);
+        fileName = `ChuyenCan_Tuan_${currentAttendanceWeek}_12A1.xls`;
+        rangeLabel = `TUẦN ${currentAttendanceWeek}`;
+      } else if (mode === 'hk1') {
+        filteredRecords = attendanceData.filter(item => parseInt(item.week) >= 1 && parseInt(item.week) <= 20);
+        fileName = `ChuyenCan_HocKy_1_12A1.xls`;
+        rangeLabel = `HỌC KỲ 1 (TUẦN 1 - 20)`;
+      } else if (mode === 'hk2') {
+        filteredRecords = attendanceData.filter(item => parseInt(item.week) >= 21 && parseInt(item.week) <= 40);
+        fileName = `ChuyenCan_HocKy_2_12A1.xls`;
+        rangeLabel = `HỌC KỲ 2 (TUẦN 21 - 40)`;
+      }
+
+      if (filteredRecords.length === 0) {
+        alert(`Không có dữ liệu chuyên cần nào để xuất cho lựa chọn này!`);
+        return;
+      }
+
+      // Sắp xếp theo tuần tăng dần để dễ theo dõi khi xuất cả học kỳ
+      filteredRecords = filteredRecords.slice().sort((a, b) => parseInt(a.week) - parseInt(b.week));
+
+      let countExcused = 0, countUnexcused = 0, countLate = 0;
+      filteredRecords.forEach(item => {
+        if (item.status === 'Có phép') countExcused++;
+        else if (item.status === 'Không phép') countUnexcused++;
+        else if (item.status === 'Đi muộn') countLate++;
+      });
+
+      let htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            table { border-collapse: collapse; width: 100%; font-family: 'Times New Roman', Times, serif; }
+            th { background-color: #0b3d2c; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 8px; text-align: center; }
+            td { border: 1px solid #000000; padding: 6px; vertical-align: middle; }
+            .text-center { text-align: center; }
+            .excused { color: #b45309; font-weight: bold; }
+            .unexcused { color: #dc2626; font-weight: bold; }
+            .late { color: #1d4ed8; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h2>BẢNG TỔNG HỢP ĐIỂM DANH & CHUYÊN CẦN LỚP 12A1</h2>
+          <h3 style="text-align:center; margin-top:-8px;">${rangeLabel}</h3>
+          <p>Tổng số lượt: <b>${filteredRecords.length}</b> &nbsp;|&nbsp; Vắng có phép (P): <b>${countExcused}</b> &nbsp;|&nbsp; Vắng không phép (KP): <b>${countUnexcused}</b> &nbsp;|&nbsp; Đi muộn (M): <b>${countLate}</b></p>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Tuần</th>
+                <th>Ngày</th>
+                <th>Học sinh</th>
+                <th>Tổ</th>
+                <th>Trạng thái</th>
+                <th>Lý do / Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      filteredRecords.forEach((item, index) => {
+        let statusClass = 'excused';
+        if (item.status === 'Không phép') statusClass = 'unexcused';
+        else if (item.status === 'Đi muộn') statusClass = 'late';
+
+        htmlContent += `
+          <tr>
+            <td class="text-center">${index + 1}</td>
+            <td class="text-center">Tuần ${item.week}</td>
+            <td class="text-center">${item.date}</td>
+            <td><b>${escapeHtml(item.name)}</b></td>
+            <td class="text-center">${escapeHtml(item.group)}</td>
+            <td class="text-center ${statusClass}">${item.status}</td>
+            <td>${escapeHtml(item.note || "")}</td>
+          </tr>
+        `;
+      });
+
+      htmlContent += `
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      alert(`✅ Đã xuất thành công file Excel chuyên cần (${fileName})!`);
+    }
+
+
     // ================= KHỞI TẠO HỆ THỐNG (DUY NHẤT 1 LUỒNG, KHÔNG CÒN TRÙNG LẶP) =================
     // Trước đây có 2 đoạn DOMContentLoaded khác nhau cùng tự fetch dữ liệu độc lập,
     // chạy song song và có thể ghi đè lẫn nhau. Giờ gộp lại 1 luồng duy nhất,
