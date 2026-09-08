@@ -811,11 +811,21 @@
         <div>
           <span class="inline-block bg-amber-400 text-slate-900 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2">Tài Chính Minh Bạch</span>
           <h1 class="text-2xl font-bold flex items-center gap-2"><i class="fa-solid fa-wallet text-custom-yellow"></i> Quản Lý Thu - Chi Quỹ Lớp 12A1</h1>
-          <p class="text-xs text-emerald-100 mt-1">Theo dõi các khoản thu/chi hoạt động ngoại khóa, khen thưởng, photo tài liệu</p>
+          <p class="text-xs text-emerald-100 mt-1">Theo dõi các khoản thu/chi hoạt động ngoại khóa, khen thưởng, photo tài liệu theo từng tuần / học kỳ</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="selectFundWeek" onchange="onFundWeekChange()" class="bg-[#0b3d2c] text-white font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-emerald-600/70 focus:outline-none focus:ring-2 focus:ring-amber-400"></select>
+          <button onclick="exportFundToExcel('week')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất thu chi của tuần đang chọn">
+            <i class="fa-solid fa-file-excel"></i> Xuất Excel (Tuần)
+          </button>
+          <button onclick="exportFundToExcel('hk1')" class="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất toàn bộ thu chi Học Kỳ 1">
+            <i class="fa-solid fa-download"></i> Xuất HK1
+          </button>
+          <button onclick="exportFundToExcel('hk2')" class="bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất toàn bộ thu chi Học Kỳ 2">
+            <i class="fa-solid fa-download"></i> Xuất HK2
+          </button>
           <button onclick="openFundModal()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-plus"></i> Thêm Giao Dịch Thu / Chi
+            <i class="fa-solid fa-plus"></i> Thêm Giao Dịch
           </button>
         </div>
       </div>
@@ -836,10 +846,16 @@
       </div>
 
       <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+        <div class="p-5 border-b bg-slate-50/60">
+          <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-emerald-700"></i> Lịch Sử Giao Dịch Thu - Chi (Toàn Bộ Năm Học)
+          </h2>
+        </div>
         <table class="w-full text-left text-sm">
           <thead>
             <tr class="bg-custom-dark text-white text-xs uppercase font-semibold">
               <th class="py-3 px-4">Ngày</th>
+              <th class="py-3 px-3 text-center">Tuần</th>
               <th class="py-3 px-4 text-center">Loại</th>
               <th class="py-3 px-6">Khoản Mục Thu / Chi</th>
               <th class="py-3 px-4 text-right">Số Tiền (VNĐ)</th>
@@ -848,6 +864,64 @@
             </tr>
           </thead>
           <tbody id="fundTableBody" class="divide-y text-sm"></tbody>
+        </table>
+      </div>
+
+      <!-- KHỐI THEO DÕI HỌC SINH NỘP QUỸ LỚP (TÍNH RIÊNG ĐỘC LẬP TỪNG HỌC KỲ) -->
+      <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+        <div class="p-5 border-b bg-slate-50/60 flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <i class="fa-solid fa-user-check text-emerald-700"></i> Theo Dõi Học Sinh Nộp Quỹ Lớp
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Ghi nhận học sinh đã nộp / chưa nộp quỹ lớp để thủ quỹ và GVCN nắm được — tính riêng độc lập cho từng học kỳ.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btnDuesHK1" onclick="setDuesSemester(1)" class="px-4 py-2 rounded-xl text-xs font-bold transition">Học Kỳ 1 (Tuần 1-20)</button>
+            <button id="btnDuesHK2" onclick="setDuesSemester(2)" class="px-4 py-2 rounded-xl text-xs font-bold transition">Học Kỳ 2 (Tuần 21-40)</button>
+            <button onclick="exportDuesToExcel('unpaid')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất danh sách học sinh chưa nộp đủ quỹ của học kỳ đang chọn">
+              <i class="fa-solid fa-file-excel"></i> Xuất DS Chưa Nộp
+            </button>
+            <button onclick="exportDuesToExcel('all')" class="bg-slate-600 hover:bg-slate-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Xuất toàn bộ danh sách nộp quỹ của học kỳ đang chọn">
+              <i class="fa-solid fa-download"></i> Xuất Toàn Bộ DS
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 border-b bg-white flex flex-wrap items-center gap-4">
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold text-slate-600">Mức đóng góp / học sinh (VNĐ):</label>
+            <input type="number" id="duesAmountRequired" min="0" step="1000" onchange="updateDuesAmountRequired(this.value)" class="admin-edit-input w-32 p-2 border rounded-lg text-sm font-bold text-emerald-700" />
+          </div>
+          <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-[280px]">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-center">
+              <p class="text-[11px] text-emerald-700 font-medium">Đã Nộp Đủ</p>
+              <p class="text-lg font-bold text-emerald-700" id="duesStatPaid">0</p>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-center">
+              <p class="text-[11px] text-amber-700 font-medium">Chưa Nộp / Một Phần</p>
+              <p class="text-lg font-bold text-amber-700" id="duesStatUnpaid">0</p>
+            </div>
+            <div class="bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 text-center">
+              <p class="text-[11px] text-rose-700 font-medium">Tổng Còn Thiếu</p>
+              <p class="text-lg font-bold text-rose-700" id="duesStatRemaining">0 đ</p>
+            </div>
+          </div>
+        </div>
+
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="bg-custom-dark text-white text-xs uppercase font-semibold">
+              <th class="py-3 px-4">STT</th>
+              <th class="py-3 px-4">Học Sinh</th>
+              <th class="py-3 px-3 text-center">Tổ</th>
+              <th class="py-3 px-4 text-right w-40">Đã Nộp (VNĐ)</th>
+              <th class="py-3 px-4 text-center">Trạng Thái</th>
+              <th class="py-3 px-6">Ghi Chú</th>
+              <th class="py-3 px-4 text-center w-36">Thao Tác Nhanh</th>
+            </tr>
+          </thead>
+          <tbody id="duesTableBody" class="divide-y text-sm"></tbody>
         </table>
       </div>
     </section>
@@ -1216,6 +1290,7 @@
           </div>
           <div><label class="block font-semibold mb-1">Số tiền (VNĐ):</label><input type="number" id="fundAmount" required min="1000" step="1000" class="w-full p-2 border rounded-lg font-bold" /></div>
         </div>
+        <div><label class="block font-semibold mb-1">Tuần áp dụng:</label><select id="fundWeek" required class="w-full p-2 border rounded-lg bg-slate-50"></select></div>
         <div><label class="block font-semibold mb-1">Khoản mục / Lý do:</label><input type="text" id="fundTitle" required placeholder="Thu quỹ HK1, Mua hoa 20/11..." class="w-full p-2 border rounded-lg" /></div>
         <div><label class="block font-semibold mb-1">Người thực hiện / Phụ trách:</label><input type="text" id="fundPerson" value="Thủ quỹ lớp" class="w-full p-2 border rounded-lg" /></div>
         <div class="flex justify-end gap-2 pt-3 border-t">
@@ -1629,9 +1704,40 @@
 
     // 10. DỮ LIỆU QUỸ LỚP
     let fundData = JSON.parse(localStorage.getItem('class_fund_12a1')) || [
-      { id: 1, date: "2026-09-05", type: "in", title: "Thu quỹ lớp Học kỳ 1 (40 HS x 100k)", amount: 4000000, person: "Thủ quỹ Thùy Dung" },
-      { id: 2, date: "2026-09-06", type: "out", title: "Mua cây lau nhà, phấn, khăn lau bảng", amount: 250000, person: "Lớp phó Lao động" }
+      { id: 1, date: "2026-09-05", week: 1, type: "in", title: "Thu quỹ lớp Học kỳ 1 (40 HS x 100k)", amount: 4000000, person: "Thủ quỹ Thùy Dung" },
+      { id: 2, date: "2026-09-06", week: 1, type: "out", title: "Mua cây lau nhà, phấn, khăn lau bảng", amount: 250000, person: "Lớp phó Lao động" }
     ];
+    // Dữ liệu cũ (trước khi có tính năng chọn Tuần) có thể chưa có trường "week" -> mặc định gán về Tuần 1.
+    function migrateFundWeeks() {
+      let changed = false;
+      fundData.forEach(item => {
+        if (!item.week || isNaN(parseInt(item.week))) { item.week = 1; changed = true; }
+      });
+      if (changed) localStorage.setItem('class_fund_12a1', JSON.stringify(fundData));
+    }
+    migrateFundWeeks();
+    let currentFundWeek = 1;
+
+    // THEO DÕI HỌC SINH NỘP QUỸ LỚP - tính riêng độc lập theo từng học kỳ (HK1: Tuần 1-20, HK2: Tuần 21-40)
+    // records lưu theo studentId: { amountPaid: số tiền đã nộp, note: ghi chú }
+    function initDuesData() {
+      return {
+        hk1: { amountRequired: 100000, records: {} },
+        hk2: { amountRequired: 100000, records: {} }
+      };
+    }
+    let duesData = JSON.parse(localStorage.getItem('class_dues_12a1')) || initDuesData();
+    // Đảm bảo cấu trúc luôn đầy đủ hk1/hk2 kể cả khi dữ liệu cũ bị thiếu (ví dụ sync từ bản trước).
+    function ensureDuesStructure() {
+      let changed = false;
+      if (!duesData.hk1) { duesData.hk1 = { amountRequired: 100000, records: {} }; changed = true; }
+      if (!duesData.hk2) { duesData.hk2 = { amountRequired: 100000, records: {} }; changed = true; }
+      if (!duesData.hk1.records) { duesData.hk1.records = {}; changed = true; }
+      if (!duesData.hk2.records) { duesData.hk2.records = {}; changed = true; }
+      if (changed) localStorage.setItem('class_dues_12a1', JSON.stringify(duesData));
+    }
+    ensureDuesStructure();
+    let currentDuesSemester = 1; // 1 = HK1 (Tuần 1-20), 2 = HK2 (Tuần 21-40)
 
     function generateParentCode() {
       const randStr = () => Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -1664,7 +1770,7 @@
       if (tabId === 'trucnhat') { renderDutyWeekDropdown(); renderDutyView(); }
       if (tabId === 'chuyencan') { renderAttendanceWeekDropdown(); renderAttendanceView(); }
       if (tabId === 'sodo') renderSeatingGrid();
-      if (tabId === 'quylop') renderFundModule();
+      if (tabId === 'quylop') { renderFundWeekDropdown(); renderFundModule(); renderDuesModule(); }
       
       applyPermissions();
     }
@@ -3027,6 +3133,23 @@
     }
 
     // TAB BỔ SUNG 3: QUẢN LÝ QUỸ LỚP LOGIC
+    function renderFundWeekDropdown() {
+      const select = document.getElementById('selectFundWeek');
+      if (!select) return;
+      select.innerHTML = '';
+      for (let i = 1; i <= TOTAL_WEEKS; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = `Quỹ lớp Tuần ${i} (${i <= 20 ? 'HK1' : 'HK2'})`;
+        if (i === currentFundWeek) opt.selected = true;
+        select.appendChild(opt);
+      }
+    }
+
+    function onFundWeekChange() {
+      currentFundWeek = parseInt(document.getElementById('selectFundWeek').value);
+    }
+
     function renderFundModule() {
       const tbody = document.getElementById('fundTableBody');
       if (!tbody) return;
@@ -3036,11 +3159,13 @@
       fundData.forEach((item, index) => {
         if (item.type === 'in') totalIn += item.amount;
         else totalOut += item.amount;
+        const wk = parseInt(item.week) || 1;
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 border-b";
         tr.innerHTML = `
           <td class="py-3 px-4 font-mono text-xs text-slate-500">${item.date}</td>
+          <td class="py-3 px-3 text-center"><span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded font-semibold">Tuần ${wk}</span></td>
           <td class="py-3 px-4 text-center">${item.type === 'in' ? '<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">Thu (+)</span>' : '<span class="bg-rose-100 text-rose-800 text-xs px-2.5 py-0.5 rounded-full font-bold">Chi (-)</span>'}</td>
           <td class="py-3 px-6 font-semibold text-slate-800">${item.title}</td>
           <td class="py-3 px-4 text-right font-bold ${item.type === 'in' ? 'text-emerald-700' : 'text-rose-600'}">${(item.amount).toLocaleString('vi-VN')} đ</td>
@@ -3064,6 +3189,17 @@
     function openFundModal() {
       document.getElementById('fundTitle').value = '';
       document.getElementById('fundAmount').value = '';
+      const weekSelect = document.getElementById('fundWeek');
+      if (weekSelect) {
+        weekSelect.innerHTML = '';
+        for (let i = 1; i <= TOTAL_WEEKS; i++) {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.innerText = `Tuần ${i} (${i <= 20 ? 'HK1' : 'HK2'})`;
+          if (i === currentFundWeek) opt.selected = true;
+          weekSelect.appendChild(opt);
+        }
+      }
       document.getElementById('fundModal').classList.remove('hidden');
       document.getElementById('fundModal').classList.add('flex');
     }
@@ -3075,6 +3211,7 @@
       fundData.unshift({
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
+        week: parseInt(document.getElementById('fundWeek').value) || currentFundWeek,
         type: document.getElementById('fundType').value,
         title: document.getElementById('fundTitle').value.trim(),
         amount: parseFloat(document.getElementById('fundAmount').value) || 0,
@@ -3093,6 +3230,336 @@
       syncToCloud(); // FIX: bổ sung đồng bộ cloud
         renderFundModule();
       }
+    }
+
+    // XUẤT EXCEL QUỸ LỚP: theo Tuần đang chọn, hoặc theo cả Học Kỳ 1 (Tuần 1-20) / Học Kỳ 2 (Tuần 21-40) / Toàn bộ năm học,
+    // tính riêng độc lập cho từng học kỳ giống như các module Vi phạm / Chuyên cần.
+    function exportFundToExcel(mode) {
+      let filteredRecords = [];
+      let fileName = "";
+      let rangeLabel = "";
+
+      if (mode === 'week') {
+        filteredRecords = fundData.filter(item => (parseInt(item.week) || 1) === currentFundWeek);
+        fileName = `QuyLop_Tuan_${currentFundWeek}_12A1.xls`;
+        rangeLabel = `TUẦN ${currentFundWeek}`;
+      } else if (mode === 'hk1') {
+        filteredRecords = fundData.filter(item => (parseInt(item.week) || 1) >= 1 && (parseInt(item.week) || 1) <= 20);
+        fileName = `QuyLop_HocKy_1_12A1.xls`;
+        rangeLabel = `HỌC KỲ 1 (TUẦN 1 - 20)`;
+      } else if (mode === 'hk2') {
+        filteredRecords = fundData.filter(item => (parseInt(item.week) || 1) >= 21 && (parseInt(item.week) || 1) <= 40);
+        fileName = `QuyLop_HocKy_2_12A1.xls`;
+        rangeLabel = `HỌC KỲ 2 (TUẦN 21 - 40)`;
+      } else {
+        filteredRecords = fundData.slice();
+        fileName = `QuyLop_TatCa_12A1.xls`;
+        rangeLabel = `TOÀN BỘ NĂM HỌC`;
+      }
+
+      if (filteredRecords.length === 0) {
+        alert(`Không có giao dịch thu/chi nào để xuất cho lựa chọn này!`);
+        return;
+      }
+
+      filteredRecords = filteredRecords.slice().sort((a, b) => (parseInt(a.week) || 1) - (parseInt(b.week) || 1));
+
+      let totalIn = 0, totalOut = 0;
+      filteredRecords.forEach(item => {
+        if (item.type === 'in') totalIn += item.amount; else totalOut += item.amount;
+      });
+      const balance = totalIn - totalOut;
+
+      let htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            table { border-collapse: collapse; width: 100%; font-family: 'Times New Roman', Times, serif; }
+            th { background-color: #0b3d2c; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 8px; text-align: center; }
+            td { border: 1px solid #000000; padding: 6px; vertical-align: middle; }
+            .text-center { text-align: center; }
+            .in { color: #047857; font-weight: bold; }
+            .out { color: #dc2626; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h2>BẢNG THU - CHI QUỸ LỚP 12A1</h2>
+          <h3 style="text-align:center; margin-top:-8px;">${rangeLabel}</h3>
+          <p>Tổng số giao dịch: <b>${filteredRecords.length}</b> &nbsp;|&nbsp; Tổng thu: <b>${totalIn.toLocaleString('vi-VN')} đ</b> &nbsp;|&nbsp; Tổng chi: <b>${totalOut.toLocaleString('vi-VN')} đ</b> &nbsp;|&nbsp; Số dư: <b>${balance.toLocaleString('vi-VN')} đ</b></p>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Ngày</th>
+                <th>Tuần</th>
+                <th>Loại</th>
+                <th>Khoản mục / Lý do</th>
+                <th>Số tiền (VNĐ)</th>
+                <th>Người thực hiện</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      filteredRecords.forEach((item, index) => {
+        const wk = parseInt(item.week) || 1;
+        htmlContent += `
+          <tr>
+            <td class="text-center">${index + 1}</td>
+            <td class="text-center">${item.date}</td>
+            <td class="text-center">Tuần ${wk}</td>
+            <td class="text-center ${item.type === 'in' ? 'in' : 'out'}">${item.type === 'in' ? 'Thu (+)' : 'Chi (-)'}</td>
+            <td>${escapeHtml(item.title)}</td>
+            <td class="text-center ${item.type === 'in' ? 'in' : 'out'}">${item.amount.toLocaleString('vi-VN')}</td>
+            <td>${escapeHtml(item.person)}</td>
+          </tr>
+        `;
+      });
+
+      htmlContent += `
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      alert(`✅ Đã xuất thành công file Excel quỹ lớp (${fileName})!`);
+    }
+
+    // ============ THEO DÕI HỌC SINH NỘP QUỸ LỚP (ĐỘC LẬP TỪNG HỌC KỲ) ============
+
+    function getDuesSemKey() { return currentDuesSemester === 1 ? 'hk1' : 'hk2'; }
+
+    function getDuesRecord(semKey, studentId) {
+      if (!duesData[semKey].records[studentId]) {
+        duesData[semKey].records[studentId] = { amountPaid: 0, note: '' };
+      }
+      return duesData[semKey].records[studentId];
+    }
+
+    function saveDuesData() {
+      localStorage.setItem('class_dues_12a1', JSON.stringify(duesData));
+      syncToCloud();
+    }
+
+    function setDuesSemester(sem) {
+      currentDuesSemester = sem;
+      renderDuesModule();
+    }
+
+    function updateDuesSemesterButtons() {
+      const btn1 = document.getElementById('btnDuesHK1');
+      const btn2 = document.getElementById('btnDuesHK2');
+      if (!btn1 || !btn2) return;
+      const activeCls = "bg-emerald-700 text-white";
+      const inactiveCls = "bg-slate-100 text-slate-600 hover:bg-slate-200";
+      btn1.className = `px-4 py-2 rounded-xl text-xs font-bold transition ${currentDuesSemester === 1 ? activeCls : inactiveCls}`;
+      btn2.className = `px-4 py-2 rounded-xl text-xs font-bold transition ${currentDuesSemester === 2 ? activeCls : inactiveCls}`;
+    }
+
+    function duesStatusOf(amountPaid, amountRequired) {
+      if (amountRequired > 0 && amountPaid >= amountRequired) return { label: 'Đã nộp đủ', cls: 'bg-emerald-100 text-emerald-800' };
+      if (amountPaid > 0) return { label: 'Nộp một phần', cls: 'bg-amber-100 text-amber-800' };
+      return { label: 'Chưa nộp', cls: 'bg-rose-100 text-rose-800 font-bold' };
+    }
+
+    function renderDuesModule() {
+      ensureDuesStructure();
+      updateDuesSemesterButtons();
+      const semKey = getDuesSemKey();
+      const semData = duesData[semKey];
+
+      const amountInput = document.getElementById('duesAmountRequired');
+      if (amountInput) amountInput.value = semData.amountRequired;
+
+      const tbody = document.getElementById('duesTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let countPaid = 0, countUnpaid = 0, totalRemaining = 0;
+
+      students.forEach((st, index) => {
+        const rec = getDuesRecord(semKey, st.id);
+        const status = duesStatusOf(rec.amountPaid, semData.amountRequired);
+        const remaining = Math.max(0, semData.amountRequired - rec.amountPaid);
+        if (status.label === 'Đã nộp đủ') countPaid++; else countUnpaid++;
+        totalRemaining += remaining;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 border-b";
+        tr.innerHTML = `
+          <td class="py-3 px-4 text-slate-500">${index + 1}</td>
+          <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(st.name)}</td>
+          <td class="py-3 px-3 text-center"><span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded">${escapeHtml(st.group || '')}</span></td>
+          <td class="py-3 px-4 text-right">
+            <input type="number" min="0" step="1000" value="${rec.amountPaid}" onchange="updateDuesAmountPaid(${st.id}, this.value)" class="admin-edit-input w-32 p-1.5 border rounded-lg text-right font-semibold" />
+          </td>
+          <td class="py-3 px-4 text-center"><span class="${status.cls} text-xs px-2.5 py-1 rounded-full">${status.label}</span></td>
+          <td class="py-3 px-6">
+            <input type="text" value="${escapeHtml(rec.note || '')}" onchange="updateDuesNote(${st.id}, this.value)" placeholder="Ghi chú (VD: đã hẹn nộp tuần sau...)" class="admin-edit-input w-full p-1.5 border rounded-lg text-xs" />
+          </td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="markDuesPaidFull(${st.id})" class="text-emerald-700 hover:text-emerald-900 p-1.5 rounded hover:bg-emerald-50 transition" title="Đánh dấu đã nộp đủ"><i class="fa-solid fa-check"></i></button>
+              <button onclick="markDuesUnpaid(${st.id})" class="text-rose-500 hover:text-rose-700 p-1.5 rounded hover:bg-rose-50 transition" title="Đánh dấu chưa nộp"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('duesStatPaid').innerText = countPaid;
+      document.getElementById('duesStatUnpaid').innerText = countUnpaid;
+      document.getElementById('duesStatRemaining').innerText = `${totalRemaining.toLocaleString('vi-VN')} đ`;
+      applyPermissions();
+    }
+
+    function updateDuesAmountRequired(value) {
+      const semKey = getDuesSemKey();
+      duesData[semKey].amountRequired = parseFloat(value) || 0;
+      saveDuesData();
+      renderDuesModule();
+    }
+
+    function updateDuesAmountPaid(studentId, value) {
+      const semKey = getDuesSemKey();
+      const rec = getDuesRecord(semKey, studentId);
+      rec.amountPaid = Math.max(0, parseFloat(value) || 0);
+      saveDuesData();
+      renderDuesModule();
+    }
+
+    function updateDuesNote(studentId, value) {
+      const semKey = getDuesSemKey();
+      const rec = getDuesRecord(semKey, studentId);
+      rec.note = value.trim();
+      saveDuesData();
+    }
+
+    function markDuesPaidFull(studentId) {
+      const semKey = getDuesSemKey();
+      const rec = getDuesRecord(semKey, studentId);
+      rec.amountPaid = duesData[semKey].amountRequired;
+      saveDuesData();
+      renderDuesModule();
+    }
+
+    function markDuesUnpaid(studentId) {
+      const semKey = getDuesSemKey();
+      const rec = getDuesRecord(semKey, studentId);
+      rec.amountPaid = 0;
+      saveDuesData();
+      renderDuesModule();
+    }
+
+    // Xuất Excel danh sách nộp quỹ: 'unpaid' = chỉ học sinh chưa nộp đủ, 'all' = toàn bộ danh sách kèm trạng thái
+    function exportDuesToExcel(mode) {
+      const semKey = getDuesSemKey();
+      const semData = duesData[semKey];
+      const semLabel = currentDuesSemester === 1 ? 'HỌC KỲ 1 (TUẦN 1 - 20)' : 'HỌC KỲ 2 (TUẦN 21 - 40)';
+      const amountRequired = semData.amountRequired || 0;
+
+      let rows = students.map(st => {
+        const rec = getDuesRecord(semKey, st.id);
+        const status = duesStatusOf(rec.amountPaid, amountRequired);
+        const remaining = Math.max(0, amountRequired - rec.amountPaid);
+        return { name: st.name, group: st.group || '', amountPaid: rec.amountPaid, remaining, statusLabel: status.label, note: rec.note || '' };
+      });
+
+      let fileName = `NopQuyLop_${semKey.toUpperCase()}_12A1.xls`;
+      if (mode === 'unpaid') {
+        rows = rows.filter(r => r.statusLabel !== 'Đã nộp đủ');
+        fileName = `ChuaNopQuyLop_${semKey.toUpperCase()}_12A1.xls`;
+        if (rows.length === 0) {
+          alert(`🎉 Toàn bộ học sinh đã nộp đủ quỹ lớp cho ${semLabel}!`);
+          return;
+        }
+      }
+
+      const totalRemaining = rows.reduce((sum, r) => sum + r.remaining, 0);
+
+      let htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            table { border-collapse: collapse; width: 100%; font-family: 'Times New Roman', Times, serif; }
+            th { background-color: #0b3d2c; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 8px; text-align: center; }
+            td { border: 1px solid #000000; padding: 6px; vertical-align: middle; }
+            .text-center { text-align: center; }
+            .paid { color: #047857; font-weight: bold; }
+            .unpaid { color: #dc2626; font-weight: bold; }
+            .partial { color: #b45309; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h2>${mode === 'unpaid' ? 'DANH SÁCH HỌC SINH CHƯA NỘP ĐỦ QUỸ LỚP 12A1' : 'DANH SÁCH NỘP QUỸ LỚP 12A1'}</h2>
+          <h3 style="text-align:center; margin-top:-8px;">${semLabel}</h3>
+          <p>Mức đóng góp / học sinh: <b>${amountRequired.toLocaleString('vi-VN')} đ</b> &nbsp;|&nbsp; Số học sinh trong danh sách: <b>${rows.length}</b> &nbsp;|&nbsp; Tổng số tiền còn thiếu: <b>${totalRemaining.toLocaleString('vi-VN')} đ</b></p>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Học sinh</th>
+                <th>Tổ</th>
+                <th>Mức đóng góp (VNĐ)</th>
+                <th>Đã nộp (VNĐ)</th>
+                <th>Còn thiếu (VNĐ)</th>
+                <th>Trạng thái</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      rows.forEach((r, index) => {
+        let statusClass = 'unpaid';
+        if (r.statusLabel === 'Đã nộp đủ') statusClass = 'paid';
+        else if (r.statusLabel === 'Nộp một phần') statusClass = 'partial';
+
+        htmlContent += `
+          <tr>
+            <td class="text-center">${index + 1}</td>
+            <td><b>${escapeHtml(r.name)}</b></td>
+            <td class="text-center">${escapeHtml(r.group)}</td>
+            <td class="text-center">${amountRequired.toLocaleString('vi-VN')}</td>
+            <td class="text-center">${r.amountPaid.toLocaleString('vi-VN')}</td>
+            <td class="text-center">${r.remaining.toLocaleString('vi-VN')}</td>
+            <td class="text-center ${statusClass}">${r.statusLabel}</td>
+            <td>${escapeHtml(r.note)}</td>
+          </tr>
+        `;
+      });
+
+      htmlContent += `
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      alert(`✅ Đã xuất thành công file Excel (${fileName})!`);
     }
 
     // QUẢN LÝ HỌC SINH (TAB 7)
@@ -3532,6 +3999,11 @@ async function loadDataFromCloud(force = false) {
       }
       if (typeof fundData !== 'undefined' && localStorage.getItem('class_fund_12a1')) {
         fundData = JSON.parse(localStorage.getItem('class_fund_12a1'));
+        if (typeof migrateFundWeeks === 'function') migrateFundWeeks();
+      }
+      if (typeof duesData !== 'undefined' && localStorage.getItem('class_dues_12a1')) {
+        duesData = JSON.parse(localStorage.getItem('class_dues_12a1'));
+        if (typeof ensureDuesStructure === 'function') ensureDuesStructure();
       }
       if (localStorage.getItem('class_criteria_student_12a1') !== null) {
         criteriaStudentText = localStorage.getItem('class_criteria_student_12a1');
@@ -3554,6 +4026,9 @@ async function loadDataFromCloud(force = false) {
       if (typeof renderDutyWeekDropdown === 'function') renderDutyWeekDropdown();
       if (typeof renderAttendanceWeekDropdown === 'function') renderAttendanceWeekDropdown();
       if (typeof renderViolationWeekDropdown === 'function') renderViolationWeekDropdown();
+      if (typeof renderFundWeekDropdown === 'function') renderFundWeekDropdown();
+      if (typeof renderFundModule === 'function') renderFundModule();
+      if (typeof renderDuesModule === 'function') renderDuesModule();
 
       setSyncStatus('loaded');
     } else {
@@ -3657,13 +4132,19 @@ setInterval(() => loadDataFromCloud(false), 15000);
 
     function applyPermissions() {
       const adminElements = document.querySelectorAll(
-        'button[onclick*="open"], button[onclick*="delete"], button[onclick*="clear"], #nav-caidat'
+        'button[onclick*="open"], button[onclick*="delete"], button[onclick*="clear"], button[onclick*="markDues"], #nav-caidat'
       );
       
       adminElements.forEach(el => {
         const action = el.getAttribute("onclick") || "";
         if (action.includes("searchByCode") || action.includes("toggleAdminAccess")) return;
         el.style.display = isAdmin ? "" : "none";
+      });
+
+      // Các ô nhập liệu chỉnh sửa trực tiếp (quỹ lớp: số tiền đã nộp, ghi chú, mức đóng góp)
+      // không ẩn hẳn (sẽ vỡ giao diện bảng) mà khóa lại (disabled) khi chưa đăng nhập quyền GVCN.
+      document.querySelectorAll('.admin-edit-input').forEach(el => {
+        el.disabled = !isAdmin;
       });
 
       const btnAdmin = document.getElementById("adminStatusBtn");
@@ -4031,6 +4512,7 @@ setInterval(() => loadDataFromCloud(false), 15000);
       if (typeof renderDutyWeekDropdown === 'function') renderDutyWeekDropdown();
       if (typeof renderAttendanceWeekDropdown === 'function') renderAttendanceWeekDropdown();
       if (typeof renderViolationWeekDropdown === 'function') renderViolationWeekDropdown();
+      if (typeof renderFundWeekDropdown === 'function') renderFundWeekDropdown();
       if (typeof applyPermissions === 'function') applyPermissions();
 
       // 2. Sau đó kéo bản mới nhất từ cloud về (nếu có mạng) và vẽ lại nếu có gì mới hơn
