@@ -1301,6 +1301,61 @@
     </div>
   </div>
 
+  <!-- MODAL: LỊCH SỬ NỘP QUỸ THEO TUẦN CỦA TỪNG HỌC SINH -->
+  <div id="duesPaymentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-start mb-1">
+        <h3 class="font-bold text-lg text-slate-800">Lịch Sử Nộp Quỹ - <span id="duesModalStudentName" class="text-emerald-700"></span></h3>
+        <button type="button" onclick="closeDuesPaymentModal()" class="text-slate-400 hover:text-slate-700 text-lg leading-none"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 mb-3">
+        <span id="duesModalSemLabel" class="font-semibold"></span> — Mức đóng góp yêu cầu: <span id="duesModalRequired" class="font-semibold text-emerald-700"></span>
+      </p>
+
+      <div class="max-h-52 overflow-y-auto border rounded-xl mb-3">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-100 text-slate-600 sticky top-0">
+            <tr>
+              <th class="py-2 px-3">Tuần</th>
+              <th class="py-2 px-3">Ngày</th>
+              <th class="py-2 px-3 text-right">Số tiền</th>
+              <th class="py-2 px-3">Ghi chú</th>
+              <th class="py-2 px-2 w-8"></th>
+            </tr>
+          </thead>
+          <tbody id="duesPaymentListBody" class="divide-y"></tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-between items-center mb-3 px-1">
+        <span class="text-xs font-semibold text-slate-600">Tổng đã nộp (học kỳ này):</span>
+        <span id="duesModalTotalPaid" class="font-bold text-emerald-700 text-base"></span>
+      </div>
+
+      <form onsubmit="addDuesPayment(event)" class="space-y-2 border-t pt-3 text-xs">
+        <p class="font-semibold text-slate-600">Ghi nhận lần nộp mới:</p>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1">Tuần áp dụng:</label>
+            <select id="duesPaymentWeek" required class="w-full p-2 border rounded-lg bg-slate-50"></select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Số tiền (VNĐ):</label>
+            <input type="number" id="duesPaymentAmount" required min="1000" step="1000" class="w-full p-2 border rounded-lg font-bold" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Ghi chú (tuỳ chọn):</label>
+          <input type="text" id="duesPaymentNote" placeholder="VD: nộp trực tiếp cho thủ quỹ..." class="w-full p-2 border rounded-lg" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="closeDuesPaymentModal()" class="px-4 py-2 bg-slate-100 rounded-lg">Đóng</button>
+          <button type="submit" class="px-5 py-2 bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold rounded-lg">+ Ghi Nhận Nộp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL SỬA ĐÁNH GIÁ CÁ NHÂN -->
   <div id="editHistoryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"><h3 class="text-lg font-bold mb-4">Sửa Đánh Giá</h3><form onsubmit="saveEditHistoryRecord(event)" class="space-y-4 text-sm"><input type="hidden" id="editHistoryIndex" /><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold mb-1">Ngày</label><input type="text" id="editHistoryDate" required class="w-full px-3 py-2 border rounded-lg" /></div><div><label class="block text-xs font-semibold mb-1">Tuần học</label><select id="editHistoryWeek" required class="w-full px-3 py-2 border rounded-lg bg-slate-50"></select></div></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold mb-1">Phân loại</label><select id="editHistoryType" class="w-full px-3 py-2 border rounded-lg"><option value="plus">Khen thưởng (+)</option><option value="minus">Vi phạm (-)</option></select></div><div><label class="block text-xs font-semibold mb-1">Điểm</label><input type="number" id="editHistoryPoints" min="1" max="50" required class="w-full px-3 py-2 border rounded-lg font-bold" /></div></div><div><label class="block text-xs font-semibold mb-1">Lý do</label><textarea id="editHistoryReason" rows="3" required class="w-full px-3 py-2 border rounded-lg"></textarea></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="button" onclick="closeEditHistoryModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="submit" class="px-5 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button></div></form></div></div>
   
@@ -1738,6 +1793,7 @@
     }
     ensureDuesStructure();
     let currentDuesSemester = 1; // 1 = HK1 (Tuần 1-20), 2 = HK2 (Tuần 21-40)
+    let duesModalStudentId = null; // Học sinh đang được mở modal xem/ghi lịch sử nộp quỹ theo tuần
 
     function generateParentCode() {
       const randStr = () => Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -3343,9 +3399,23 @@
 
     function getDuesRecord(semKey, studentId) {
       if (!duesData[semKey].records[studentId]) {
-        duesData[semKey].records[studentId] = { amountPaid: 0, note: '' };
+        duesData[semKey].records[studentId] = { payments: [], note: '' };
       }
-      return duesData[semKey].records[studentId];
+      const rec = duesData[semKey].records[studentId];
+      // Di trú bản ghi cũ (trước khi có tính năng ghi theo từng tuần): chỉ có 1 số "amountPaid" duy nhất
+      // -> chuyển thành 1 dòng lịch sử duy nhất để không mất dữ liệu đã nhập trước đó.
+      if (!Array.isArray(rec.payments)) {
+        const oldAmount = parseFloat(rec.amountPaid) || 0;
+        rec.payments = oldAmount > 0 ? [{ week: null, amount: oldAmount, date: '', note: 'Dữ liệu trước khi nâng cấp' }] : [];
+        delete rec.amountPaid;
+      }
+      return rec;
+    }
+
+    // Tổng số tiền đã nộp = cộng dồn tất cả các lần nộp theo tuần đã ghi nhận
+    function getDuesTotalPaid(rec) {
+      if (!rec || !Array.isArray(rec.payments)) return 0;
+      return rec.payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
     }
 
     function saveDuesData() {
@@ -3391,8 +3461,10 @@
 
       students.forEach((st, index) => {
         const rec = getDuesRecord(semKey, st.id);
-        const status = duesStatusOf(rec.amountPaid, semData.amountRequired);
-        const remaining = Math.max(0, semData.amountRequired - rec.amountPaid);
+        const amountPaid = getDuesTotalPaid(rec);
+        const status = duesStatusOf(amountPaid, semData.amountRequired);
+        const remaining = Math.max(0, semData.amountRequired - amountPaid);
+        const paymentsCount = rec.payments.length;
         if (status.label === 'Đã nộp đủ') countPaid++; else countUnpaid++;
         totalRemaining += remaining;
 
@@ -3403,17 +3475,17 @@
           <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(st.name)}</td>
           <td class="py-3 px-3 text-center"><span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded">${escapeHtml(st.group || '')}</span></td>
           <td class="py-3 px-4 text-right">
-            <input type="number" min="0" step="1000" value="${rec.amountPaid}" onchange="updateDuesAmountPaid(${st.id}, this.value)" class="admin-edit-input w-32 p-1.5 border rounded-lg text-right font-semibold" />
+            <div class="font-bold text-slate-800">${amountPaid.toLocaleString('vi-VN')} đ</div>
+            <div class="text-[10px] text-slate-400">${paymentsCount > 0 ? `${paymentsCount} lần nộp` : 'Chưa có lần nộp'}</div>
           </td>
           <td class="py-3 px-4 text-center"><span class="${status.cls} text-xs px-2.5 py-1 rounded-full">${status.label}</span></td>
           <td class="py-3 px-6">
-            <input type="text" value="${escapeHtml(rec.note || '')}" onchange="updateDuesNote(${st.id}, this.value)" placeholder="Ghi chú (VD: đã hẹn nộp tuần sau...)" class="admin-edit-input w-full p-1.5 border rounded-lg text-xs" />
+            <input type="text" value="${escapeHtml(rec.note || '')}" onchange="updateDuesNote(${st.id}, this.value)" placeholder="Ghi chú chung (VD: đã hẹn nộp tuần sau...)" class="admin-edit-input w-full p-1.5 border rounded-lg text-xs" />
           </td>
           <td class="py-3 px-4 text-center">
-            <div class="flex items-center justify-center gap-1.5">
-              <button onclick="markDuesPaidFull(${st.id})" class="text-emerald-700 hover:text-emerald-900 p-1.5 rounded hover:bg-emerald-50 transition" title="Đánh dấu đã nộp đủ"><i class="fa-solid fa-check"></i></button>
-              <button onclick="markDuesUnpaid(${st.id})" class="text-rose-500 hover:text-rose-700 p-1.5 rounded hover:bg-rose-50 transition" title="Đánh dấu chưa nộp"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+            <button onclick="openDuesPaymentModal(${st.id})" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1.5" title="Xem / ghi nhận các lần nộp theo tuần">
+              <i class="fa-solid fa-clock-rotate-left"></i> Chi tiết
+            </button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -3432,14 +3504,6 @@
       renderDuesModule();
     }
 
-    function updateDuesAmountPaid(studentId, value) {
-      const semKey = getDuesSemKey();
-      const rec = getDuesRecord(semKey, studentId);
-      rec.amountPaid = Math.max(0, parseFloat(value) || 0);
-      saveDuesData();
-      renderDuesModule();
-    }
-
     function updateDuesNote(studentId, value) {
       const semKey = getDuesSemKey();
       const rec = getDuesRecord(semKey, studentId);
@@ -3447,19 +3511,107 @@
       saveDuesData();
     }
 
-    function markDuesPaidFull(studentId) {
+    // ============ MODAL: LỊCH SỬ NỘP QUỸ THEO TUẦN CỦA TỪNG HỌC SINH ============
+
+    function openDuesPaymentModal(studentId) {
+      const st = students.find(s => s.id === studentId);
+      if (!st) return;
+      duesModalStudentId = studentId;
+
       const semKey = getDuesSemKey();
-      const rec = getDuesRecord(semKey, studentId);
-      rec.amountPaid = duesData[semKey].amountRequired;
+      const semData = duesData[semKey];
+
+      document.getElementById('duesModalStudentName').innerText = st.name;
+      document.getElementById('duesModalSemLabel').innerText = currentDuesSemester === 1 ? 'Học Kỳ 1 (Tuần 1-20)' : 'Học Kỳ 2 (Tuần 21-40)';
+      document.getElementById('duesModalRequired').innerText = `${(semData.amountRequired || 0).toLocaleString('vi-VN')} đ`;
+
+      // Dropdown chọn tuần: chỉ hiển thị đúng phạm vi tuần của học kỳ đang chọn
+      const weekSelect = document.getElementById('duesPaymentWeek');
+      weekSelect.innerHTML = '';
+      const wStart = currentDuesSemester === 1 ? 1 : 21;
+      const wEnd = currentDuesSemester === 1 ? 20 : 40;
+      for (let w = wStart; w <= wEnd; w++) {
+        const opt = document.createElement('option');
+        opt.value = w;
+        opt.innerText = `Tuần ${w}`;
+        weekSelect.appendChild(opt);
+      }
+
+      document.getElementById('duesPaymentAmount').value = '';
+      document.getElementById('duesPaymentNote').value = '';
+
+      renderDuesPaymentList();
+
+      document.getElementById('duesPaymentModal').classList.remove('hidden');
+      document.getElementById('duesPaymentModal').classList.add('flex');
+      applyPermissions();
+    }
+
+    function closeDuesPaymentModal() {
+      document.getElementById('duesPaymentModal').classList.add('hidden');
+      duesModalStudentId = null;
+    }
+
+    function renderDuesPaymentList() {
+      if (duesModalStudentId === null) return;
+      const semKey = getDuesSemKey();
+      const rec = getDuesRecord(semKey, duesModalStudentId);
+      const tbody = document.getElementById('duesPaymentListBody');
+      tbody.innerHTML = '';
+
+      const payments = rec.payments.slice().sort((a, b) => (a.week || 0) - (b.week || 0));
+
+      if (payments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 px-3 text-center text-slate-400 italic">Chưa có lần nộp nào được ghi nhận cho học kỳ này.</td></tr>`;
+      } else {
+        payments.forEach((p) => {
+          const realIndex = rec.payments.indexOf(p);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="py-2 px-3">${p.week ? `Tuần ${p.week}` : '<span class="italic text-slate-400">Trước nâng cấp</span>'}</td>
+            <td class="py-2 px-3 text-slate-500">${p.date || ''}</td>
+            <td class="py-2 px-3 text-right font-semibold text-emerald-700">${(p.amount || 0).toLocaleString('vi-VN')} đ</td>
+            <td class="py-2 px-3 text-slate-500">${escapeHtml(p.note || '')}</td>
+            <td class="py-2 px-2 text-center">
+              <button onclick="deleteDuesPayment(${realIndex})" class="text-rose-500 hover:text-rose-700" title="Xóa lần nộp này"><i class="fa-regular fa-trash-can"></i></button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('duesModalTotalPaid').innerText = `${getDuesTotalPaid(rec).toLocaleString('vi-VN')} đ`;
+      applyPermissions();
+    }
+
+    function addDuesPayment(e) {
+      e.preventDefault();
+      if (duesModalStudentId === null) return;
+      const semKey = getDuesSemKey();
+      const rec = getDuesRecord(semKey, duesModalStudentId);
+
+      rec.payments.push({
+        week: parseInt(document.getElementById('duesPaymentWeek').value) || currentFundWeek,
+        amount: parseFloat(document.getElementById('duesPaymentAmount').value) || 0,
+        date: new Date().toISOString().split('T')[0],
+        note: document.getElementById('duesPaymentNote').value.trim()
+      });
+
       saveDuesData();
+      document.getElementById('duesPaymentAmount').value = '';
+      document.getElementById('duesPaymentNote').value = '';
+      renderDuesPaymentList();
       renderDuesModule();
     }
 
-    function markDuesUnpaid(studentId) {
+    function deleteDuesPayment(paymentIndex) {
+      if (duesModalStudentId === null) return;
+      if (!confirm("Thầy có chắc muốn xóa lần nộp quỹ này?")) return;
       const semKey = getDuesSemKey();
-      const rec = getDuesRecord(semKey, studentId);
-      rec.amountPaid = 0;
+      const rec = getDuesRecord(semKey, duesModalStudentId);
+      rec.payments.splice(paymentIndex, 1);
       saveDuesData();
+      renderDuesPaymentList();
       renderDuesModule();
     }
 
@@ -3472,9 +3624,10 @@
 
       let rows = students.map(st => {
         const rec = getDuesRecord(semKey, st.id);
-        const status = duesStatusOf(rec.amountPaid, amountRequired);
-        const remaining = Math.max(0, amountRequired - rec.amountPaid);
-        return { name: st.name, group: st.group || '', amountPaid: rec.amountPaid, remaining, statusLabel: status.label, note: rec.note || '' };
+        const amountPaid = getDuesTotalPaid(rec);
+        const status = duesStatusOf(amountPaid, amountRequired);
+        const remaining = Math.max(0, amountRequired - amountPaid);
+        return { name: st.name, group: st.group || '', amountPaid, remaining, statusLabel: status.label, note: rec.note || '' };
       });
 
       let fileName = `NopQuyLop_${semKey.toUpperCase()}_12A1.xls`;
