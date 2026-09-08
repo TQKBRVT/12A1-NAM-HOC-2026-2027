@@ -1278,6 +1278,39 @@
   <div id="scoreModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"><h3 id="modalScoreTitle" class="text-lg font-bold mb-4">Điểm</h3><form onsubmit="saveScoreAction(event)" class="space-y-4 text-sm"><input type="hidden" id="actionType" value="plus" /><div><label class="block text-xs font-semibold mb-1">Áp dụng cho tuần học</label><select id="actionWeek" required class="w-full px-3 py-2 border rounded-lg font-semibold bg-slate-50"></select></div><div><label class="block text-xs font-semibold mb-1">Số Điểm</label><input type="number" id="actionPoints" required min="1" max="50" value="5" class="w-full px-3 py-2 border rounded-lg font-bold text-emerald-700" /></div><div><label class="block text-xs font-semibold mb-1">Lý Do</label><textarea id="actionReason" required rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="button" onclick="closeScoreModal()" class="px-4 py-2 bg-slate-100 text-xs">Hủy</button><button type="submit" id="btnScoreSubmit" class="px-4 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-lg">Lưu</button></div></form></div></div>
 
   <!-- JAVASCRIPT LOGIC -->
+  <!-- MODAL ĐĂNG NHẬP GVCN (Hoạt động tốt 100% trên app điện thoại) -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-6 shadow-2xl border border-slate-200">
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-800">Đăng Nhập GVCN</h3>
+        <p class="text-xs text-slate-500 mt-1">Nhập mật khẩu quản trị để mở khóa quyền chỉnh sửa dữ liệu</p>
+      </div>
+
+      <form onsubmit="submitLogin(event)" class="space-y-4">
+        <div>
+          <input 
+            type="password" 
+            id="adminPinInput" 
+            placeholder="Nhập mã PIN..." 
+            required 
+            autocomplete="current-password"
+            class="w-full px-4 py-3 border border-slate-300 rounded-xl text-center text-sm tracking-widest font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none bg-slate-50"
+          />
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeLoginModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+            Hủy
+          </button>
+          <button type="submit" class="w-1/2 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 text-xs font-bold rounded-xl shadow transition">
+            Xác nhận
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
   <script>
     const TOTAL_WEEKS = 40;
 // --- CẤU HÌNH ĐÁM MÂY ---
@@ -3569,27 +3602,55 @@ setInterval(() => loadDataFromCloud(false), 15000);
       renderRenLuyenModule(); closeScoreModal();
       await syncToCloud();
 }
-    // PHÂN QUYỀN GVCN
+   // PHÂN QUYỀN GVCN - Dùng localStorage để lưu vĩnh viễn trên App điện thoại
     const GVCN_PIN = "12A1@2026"; 
-    let isAdmin = sessionStorage.getItem("is_admin_12a1") === "true";
+    let isAdmin = localStorage.getItem("is_admin_12a1") === "true";
 
     function toggleAdminAccess() {
       if (isAdmin) {
         if (confirm("Thầy có muốn đăng xuất quyền Quản trị GVCN?")) {
-          sessionStorage.removeItem("is_admin_12a1");
+          localStorage.removeItem("is_admin_12a1");
           isAdmin = false;
           applyPermissions();
-          alert("Đã khóa quyền quản trị (Chế độ khách/phụ huynh).");
+          alert("Đã đăng xuất quyền quản trị.");
         }
       } else {
-        const pin = prompt("Vui lòng nhập Mật khẩu Quản trị GVCN:");
-        if (pin === GVCN_PIN) {
-          sessionStorage.setItem("is_admin_12a1", "true");
-          isAdmin = true;
-          alert("✅ Đăng nhập quyền GVCN thành công!");
-          applyPermissions();
-        } else if (pin !== null) {
-          alert("❌ Mật khẩu không chính xác!");
+        openLoginModal();
+      }
+    }
+
+    function openLoginModal() {
+      const modal = document.getElementById('loginModal');
+      const input = document.getElementById('adminPinInput');
+      if (input) input.value = '';
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => input?.focus(), 200);
+      }
+    }
+
+    function closeLoginModal() {
+      const modal = document.getElementById('loginModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function submitLogin(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('adminPinInput');
+      const pin = input ? input.value.trim() : '';
+      
+      if (pin === GVCN_PIN) {
+        localStorage.setItem("is_admin_12a1", "true");
+        isAdmin = true;
+        applyPermissions();
+        closeLoginModal();
+        alert("✅ Đăng nhập quyền GVCN thành công!");
+      } else {
+        alert("❌ Mật khẩu không chính xác! Vui lòng nhập lại.");
+        if (input) {
+          input.value = '';
+          input.focus();
         }
       }
     }
