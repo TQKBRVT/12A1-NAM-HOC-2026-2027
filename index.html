@@ -4147,8 +4147,10 @@ async function loadDataFromCloud(force = false) {
       const cloudTs = parseInt(json.data.updatedAt || json.updatedAt || 0) || 0;
       const localTs = parseInt(localStorage.getItem(SYNC_TS_KEY) || 0) || 0;
 
-      // Nếu không phải làm mới thủ công, chỉ áp dụng khi cloud thực sự mới hơn
-      if (!force && cloudTs > 0 && cloudTs <= localTs) {
+      // LUÔN kiểm tra mốc thời gian, kể cả khi force=true (bấm "Làm mới" hoặc tải lại trang).
+      // Trước đây force=true bỏ qua hẳn kiểm tra này, khiến dữ liệu mới xóa/sửa trên máy
+      // (nhưng chưa kịp đồng bộ lên cloud) bị ghi đè ngược lại bằng bản cũ trên cloud.
+      if (cloudTs > 0 && cloudTs <= localTs) {
         setSyncStatus('loaded');
         return;
       }
